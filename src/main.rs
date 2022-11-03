@@ -1,4 +1,6 @@
-use fake::faker;
+use chrono::Utc;
+use chrono::{prelude::*, Duration};
+use fake::faker::{self};
 use rand::Rng;
 
 struct User {
@@ -23,6 +25,8 @@ enum TodoItemStatus {
     ReadyToStart,
 }
 
+ 
+
 pub const PROJECT_COLORS: [&str; 10] = [
     "#61e294ff",
     "#7bcdbaff",
@@ -36,9 +40,21 @@ pub const PROJECT_COLORS: [&str; 10] = [
     "#7f6a93ff",
 ];
 
+pub const TIME_IN_SECONDS_OPTIONS: [i32; 7] = [3600, 1800, 5400, 3450, 1600, 1954, 7200];
 
 impl Todo{
     fn newRandomTodo() -> Todo {
+
+        let random_amount_of_days = rand::thread_rng().gen_range(0..=10);
+         let amount_of_days = Duration::days(random_amount_of_days);
+        let random_time_in_seconds = TIME_IN_SECONDS_OPTIONS[rand::thread_rng().gen_range(0..TIME_IN_SECONDS_OPTIONS.len())];
+
+        let random_date = Utc::now() - amount_of_days;
+
+    let fake_initial_date = random_date - Duration::seconds(random_time_in_seconds as i64);
+    let fake_end_date = random_date + Duration::seconds(random_time_in_seconds as i64);
+
+
         Todo {
            id: 100,
     name: fake::faker::lorem::en::Words(10).fake::<String>().to_string(),
