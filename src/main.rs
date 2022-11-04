@@ -108,13 +108,13 @@ fn main() {
     // let output_path = std::env::args().nth(2).unwrap();
 
     let todos = generate_todo_list_struc(10);
-    let random_enum_value = Task::get_random_task_status();
+    let _random_enum_value = Task::get_random_task_status();
     // println!("{:?}", random_enum_value);
     generate_json_db(&todos, "tasks_json_db.json".to_string());
 }
 
 fn generate_json_db(tasks: &Vec<Task>, output_path: String) {
-    let mut writer = BufWriter::new(File::create("tasks_json_db.json").unwrap());
+    let mut writer = BufWriter::new(File::create(output_path).unwrap());
     serde_json::to_writer_pretty(&mut writer, &tasks).unwrap();
 }
 
