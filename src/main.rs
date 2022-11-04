@@ -110,10 +110,10 @@ fn main() {
     let todos = generate_todo_list_struc(10);
     let random_enum_value = Task::get_random_task_status();
     // println!("{:?}", random_enum_value);
-    generateJsonDb(&todos, "tasks_json_db.json".to_string());
+    generate_json_db(&todos, "tasks_json_db.json".to_string());
 }
 
-fn generateJsonDb(tasks: &Vec<Task>, output_path: String) {
+fn generate_json_db(tasks: &Vec<Task>, output_path: String) {
     let mut writer = BufWriter::new(File::create("tasks_json_db.json").unwrap());
     serde_json::to_writer_pretty(&mut writer, &tasks).unwrap();
 }
