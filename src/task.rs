@@ -7,6 +7,8 @@ use rand::Rng;
 use serde::{self, Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::helpers::PROJECT_COLORS;
+use crate::helpers::TIME_IN_SECONDS_OPTIONS;
 use crate::user::User;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -38,7 +40,7 @@ impl TaskStatus {
         // https://github.com/rust-lang/rust/issues/73662
         // let enum_length = mem::variant_count::<TaskStatus>();
 
-        match rand::thread_rng().gen_range(0..=4) {
+        match rand::thread_rng().gen_range(0..=3) {
             0 => TaskStatus::Done,
             1 => TaskStatus::InProgress,
             2 => TaskStatus::NotNedeed,
@@ -47,21 +49,6 @@ impl TaskStatus {
         }
     }
 }
-
-pub const PROJECT_COLORS: [&str; 10] = [
-    "#61e294ff",
-    "#7bcdbaff",
-    "#9799caff",
-    "#bd93d8ff",
-    "#b47aeaff",
-    "#d3d5d4ff",
-    "#a2c5acff",
-    "#9db5b2ff",
-    "#878e99ff",
-    "#7f6a93ff",
-];
-
-pub const TIME_IN_SECONDS_OPTIONS: [i32; 7] = [3600, 1800, 5400, 3450, 1600, 1954, 7200];
 
 impl Task {
     pub fn new_random_task(user: &Option<User>) -> Task {
