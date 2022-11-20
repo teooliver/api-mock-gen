@@ -1,70 +1,108 @@
 mod comment;
+mod controllers;
+mod db;
 mod helpers;
 mod post;
 mod task;
 mod user;
 
-use std::fs::File;
-use std::io::BufWriter;
+use controllers::remove_task_by_id;
+use db::AppData;
+use std::sync::{Arc, RwLock};
 
-use comment::Comment;
-use post::Post;
-use rand::Rng;
-use serde::{self, Serialize};
-use task::Task;
-use user::User;
+use axum::{
+    routing::{delete, get, post},
+    Router,
+};
+use std::net::SocketAddr;
 
-fn main() {
-    let AppData {
-        todos,
-        users,
-        posts,
-        ..
-    } = generate_todo_list_struc(10, 4);
-    generate_json_db(&todos, "tasks_json_db.json".to_string());
-    generate_json_db(&users, "users_json_db.json".to_string());
-    generate_json_db(&posts, "posts_json_db.json".to_string());
-}
+use crate::controllers::get_tasks;
+use crate::controllers::{create_user, get_user_by_id, get_users, remove_user_by_id};
+use crate::db::generate_app_data;
+use crate::{controllers::get_task_by_id, helpers::generate_json_db};
 
-struct AppData {
-    todos: Vec<Task>,
-    users: Vec<User>,
-    posts: Vec<Post>,
-    comments: Vec<Comment>,
-}
+// use axum_macros::debug_handler;
 
-fn generate_json_db<T: Serialize>(input: &Vec<T>, output_path: String) {
-    let mut writer = BufWriter::new(File::create(output_path).unwrap());
-    serde_json::to_writer_pretty(&mut writer, &input).unwrap();
-}
+#[tokio::main]
+async fn main() {
+    tracing_subscriber::fmt::init();
 
-// TODO: argument should be optional
-fn generate_todo_list_struc(amount_of_tasks: u8, amount_of_users: u8) -> AppData {
-    let mut comments: Vec<Comment> = vec![];
+    let db = generate_app_data(100, 1);
 
-    let mut users: Vec<User> = vec![];
-    for _n in 1..=amount_of_users {
-        users.push(User::create_random_user());
-    }
+    // TODO: Check if mocked_db folder exists, if not create it
+    // QUESTION: Should the "collections" be created all in on json file,
+    // or should we keep them separate
+    // TODO: Serve those json files in routes, just as an example on how to
+    // serve files on axun. Could be also usefull as a way of grabing all info all at once
+    // in the case we have one json file with all collections
+    generate_json_db(&db.tasks, "mocked_db/tasks_json_db.json".to_string());
+    generate_json_db(&db.users, "mocked_db/users_json_db.json".to_string());
+    generate_json_db(&db.posts, "mocked_db/posts_json_db.json".to_string());
+    generate_json_db(&db.comments, "mocked_db/comments_json_db.json".to_string());
 
-    let mut todos: Vec<Task> = vec![];
-    for _n in 1..=amount_of_tasks {
-        todos.push(Task::new_random_task(&Some(
-            users[rand::thread_rng().gen_range(0..users.len())].clone(),
-        )));
-    }
+    // type Db = Arc<RwLock<AppData>>; ?
+    // Explain in my own words why we need Arc and RwLock here
+    let shared_state: Arc<RwLock<AppData>> = Arc::new(RwLock::new(db.clone()));
 
-    let mut posts: Vec<Post> = vec![];
-    for _n in 1..=20 {
-        posts.push(Post::new_random_post(&Some(
-            users[rand::thread_rng().gen_range(0..users.len())].clone(),
-        )));
-    }
+    // TODO: use `merge` and `nest` so we can organize these routes
+    // in separate files. Also use `layer` or write our own middleware to
+    // pass the db into the routes (so we dont have to move the shared_state
+    // into each route one by one)
+    let app = Router::new()
+        .route(
+            "/users",
+            get({
+                let shared_state = Arc::clone(&shared_state);
+                move || get_users(Arc::clone(&shared_state))
+            }),
+        )
+        .route(
+            "/users/:id",
+            get({
+                let shared_state = Arc::clone(&shared_state);
+                move |path| get_user_by_id(path, Arc::clone(&shared_state))
+            }),
+        )
+        .route(
+            "/users/",
+            post({
+                let shared_state = Arc::clone(&shared_state);
+                move |body| create_user(body, Arc::clone(&shared_state))
+            }),
+        )
+        .route(
+            "/users/:id",
+            delete({
+                let shared_state = Arc::clone(&shared_state);
+                move |path| remove_user_by_id(path, Arc::clone(&shared_state))
+            }),
+        )
+        .route(
+            "/tasks",
+            get({
+                let shared_state = Arc::clone(&shared_state);
+                move || get_tasks(Arc::clone(&shared_state))
+            }),
+        )
+        .route(
+            "/tasks/:id",
+            get({
+                let shared_state = Arc::clone(&shared_state);
+                move |path| get_task_by_id(path, Arc::clone(&shared_state))
+            }),
+        )
+        .route(
+            "/tasks/:id",
+            delete({
+                let shared_state = Arc::clone(&shared_state);
+                move |path| remove_task_by_id(path, Arc::clone(&shared_state))
+            }),
+        );
 
-    AppData {
-        todos,
-        users,
-        posts,
-        comments,
-    }
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    tracing::debug!("listening on {}", addr);
+    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }

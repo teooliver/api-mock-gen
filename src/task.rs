@@ -54,7 +54,7 @@ impl Task {
     pub fn new_random_task(user: &Option<User>) -> Task {
         let user = match user {
             Some(u) => u.clone(),
-            None => User::create_random_user(),
+            None => User::new_random_user(),
         };
 
         let random_amount_of_days = rand::thread_rng().gen_range(0..=10);
@@ -71,8 +71,6 @@ impl Task {
             id: Uuid::new_v4(),
             name: Words(3..5).fake::<Vec<String>>().join(" "),
             status: TaskStatus::get_random_task_status(),
-            // TODO: Generate a separate table of users, and then reference the id instead.
-            // generate a separate json file for the users too: users_json_db.json
             user,
             started_at: fake_initial_date,
             updated_at: fake_end_date,

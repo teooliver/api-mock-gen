@@ -19,7 +19,7 @@ pub enum PostStatus {
 
 impl PostStatus {
     fn get_random_post_status() -> PostStatus {
-        // TODO: use this when stable so we dont have to
+        // TODO: use the following when stable so we dont have to
         // hard code the enum length in the `gen_range`, that way we can
         // avoid breaking functionality with the enum changes.
         //
@@ -51,7 +51,7 @@ impl Post {
     pub fn new_random_post(user: &Option<User>) -> Post {
         let user = match user {
             Some(u) => u.clone(),
-            None => User::create_random_user(),
+            None => User::new_random_user(),
         };
 
         let random_amount_of_days = rand::thread_rng().gen_range(0..=10);
