@@ -16,8 +16,8 @@ use axum::{
 };
 use std::net::SocketAddr;
 
-use crate::controllers::get_tasks;
 use crate::controllers::{create_user, get_user_by_id, get_users, remove_user_by_id};
+use crate::controllers::{get_all_tasks_from_user, get_tasks};
 use crate::db::generate_app_data;
 use crate::{controllers::get_task_by_id, helpers::generate_json_db};
 
@@ -27,7 +27,7 @@ use crate::{controllers::get_task_by_id, helpers::generate_json_db};
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    let db = generate_app_data(100, 1);
+    let db = generate_app_data(100, 5);
 
     // TODO: Check if mocked_db folder exists, if not create it
     // QUESTION: Should the "collections" be created all in on json file,
@@ -78,6 +78,13 @@ async fn main() {
             }),
         )
         .route(
+            "/users/:id/tasks",
+            get({
+                let shared_state = Arc::clone(&shared_state);
+                move |path| get_all_tasks_from_user(path, Arc::clone(&shared_state))
+            }),
+        )
+        .route(
             "/tasks",
             get({
                 let shared_state = Arc::clone(&shared_state);
@@ -101,7 +108,7 @@ async fn main() {
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     tracing::debug!("listening on {}", addr);
-    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
+    axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
         .unwrap();

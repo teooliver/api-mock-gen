@@ -56,12 +56,6 @@ impl AppData {
         task
     }
 
-    fn get_all_user_tasks(&self, id: &Uuid) -> Option<&Vec<Task>> {
-        // let task = self.tasks.iter().find(|task| task.id == *id).unwrap();
-        // task
-        todo!()
-    }
-
     pub fn remove_task_by_id(&mut self, id: &Uuid) -> Option<Task> {
         let index = self.tasks.iter().position(|task| task.id == *id);
 
@@ -72,6 +66,22 @@ impl AppData {
             }
             None => return None,
         };
+    }
+
+    pub fn get_all_user_tasks(&self, user_id: &Uuid) -> Option<Vec<Task>> {
+        // let task = self.tasks.iter().find(|task| task.id == *id).unwrap();
+        let mut tasks: Vec<Task> = vec![];
+        self.tasks.iter().for_each(|task| {
+            if task.user.id == *user_id {
+                tasks.push(task.clone())
+            }
+        });
+
+        if tasks.len() == 0 {
+            return None;
+        }
+
+        Some(tasks.clone())
     }
 
     // ============================

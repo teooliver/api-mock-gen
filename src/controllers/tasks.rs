@@ -39,7 +39,7 @@ pub async fn remove_task_by_id(
     let id = match id {
         Ok(id) => id,
         Err(_error) => {
-            return (StatusCode::BAD_REQUEST, "id not should be of type UUID").into_response();
+            return (StatusCode::BAD_REQUEST, "id should be of type UUID").into_response();
         }
     };
 
@@ -47,6 +47,27 @@ pub async fn remove_task_by_id(
 
     match task {
         Some(task) => (StatusCode::FOUND, Json(task)).into_response(),
+        None => (StatusCode::NOT_FOUND, "user not found").into_response(),
+    }
+}
+
+pub async fn get_all_tasks_from_user(
+    Path(user_id): Path<String>,
+    state: Arc<RwLock<AppData>>,
+) -> impl IntoResponse {
+    let id = Uuid::parse_str(&user_id);
+
+    let id = match id {
+        Ok(id) => id,
+        Err(_error) => {
+            return (StatusCode::BAD_REQUEST, "id should be of type UUID").into_response();
+        }
+    };
+
+    let tasks = state.read().unwrap().get_all_user_tasks(&id);
+
+    match tasks {
+        Some(tasks) => (StatusCode::FOUND, Json(tasks)).into_response(),
         None => (StatusCode::NOT_FOUND, "user not found").into_response(),
     }
 }
