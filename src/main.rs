@@ -50,6 +50,13 @@ async fn main() {
     // into each route one by one)
     let app = Router::new()
         .route(
+            "/generate-data",
+            get({
+                let shared_state = Arc::clone(&shared_state);
+                move || get_users(Arc::clone(&shared_state))
+            }),
+        )
+        .route(
             "/users",
             get({
                 let shared_state = Arc::clone(&shared_state);

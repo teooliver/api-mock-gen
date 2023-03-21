@@ -125,6 +125,9 @@ impl AppData {
     }
 }
 
+// Should this be a method of AppData instead? (So we can regenerate data at any time by calling an endpoint)
+// This way we can play with the data, delete, add and etc to the db, and then just call a endpoint to regenerate and start from scratch
+// TODO: add amount of posts and amount_of_comments as "optional" params.
 pub fn generate_app_data(amount_of_tasks: u8, amount_of_users: u8) -> AppData {
     let mut users: Vec<User> = vec![];
     for _n in 1..=amount_of_users {
