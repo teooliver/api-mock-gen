@@ -71,7 +71,7 @@ async fn main() {
             }),
         )
         .route(
-            "/users/",
+            "/users",
             post({
                 let shared_state = Arc::clone(&shared_state);
                 move |body| create_user(body, Arc::clone(&shared_state))
@@ -106,7 +106,7 @@ async fn main() {
             }),
         )
         .route(
-            "/tasks/",
+            "/tasks",
             post({
                 let shared_state = Arc::clone(&shared_state);
                 move |body| create_task(body, Arc::clone(&shared_state))
