@@ -25,7 +25,7 @@ impl User {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct CreateUser {
+pub struct NewUser {
     pub name: String,
     pub email: String,
 }

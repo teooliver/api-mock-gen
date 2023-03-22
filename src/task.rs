@@ -11,6 +11,7 @@ use crate::helpers::PROJECT_COLORS;
 use crate::helpers::TIME_IN_SECONDS_OPTIONS;
 use crate::user::User;
 
+// TODO: add created_at
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Task {
     pub id: Uuid,
@@ -18,8 +19,8 @@ pub struct Task {
     pub status: TaskStatus,
     pub user: User,
     pub started_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-    pub finished_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,  // This should be Optional
+    pub finished_at: DateTime<Utc>, // This should be Optional
     pub color: String,
 }
 
@@ -29,6 +30,17 @@ pub enum TaskStatus {
     InProgress,
     NotNedeed,
     ReadyToStart,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct NewTask {
+    pub name: String,
+    pub status: TaskStatus,
+    pub user: User,
+    pub started_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub finished_at: Option<DateTime<Utc>>,
+    pub color: Option<String>,
 }
 
 impl TaskStatus {

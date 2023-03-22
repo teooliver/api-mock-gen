@@ -1,9 +1,14 @@
 use std::sync::{Arc, RwLock};
 
 use axum::{extract::Path, http::StatusCode, response::IntoResponse, Json};
+use chrono::Utc;
+use tracing::debug;
 use uuid::Uuid;
 
-use crate::db::AppData;
+use crate::{
+    db::AppData,
+    task::{NewTask, Task},
+};
 
 pub async fn get_tasks(state: Arc<RwLock<AppData>>) -> impl IntoResponse {
     (StatusCode::OK, Json(state.read().unwrap().get_tasks())).into_response()
@@ -70,4 +75,23 @@ pub async fn get_all_tasks_from_user(
         Some(tasks) => (StatusCode::FOUND, Json(tasks)).into_response(),
         None => (StatusCode::NOT_FOUND, "user not found").into_response(),
     }
+}
+
+pub async fn create_task(
+    Json(payload): Json<NewTask>,
+    state: Arc<RwLock<AppData>>,
+) -> impl IntoResponse {
+    let new_task = Task {
+        id: Uuid::new_v4(),
+        name: payload.name,
+        status: payload.status,
+        user: payload.user,
+        started_at: payload.started_at,
+        updated_at: payload.updated_at,
+        finished_at: payload.finished_at.unwrap_or_default(),
+        color: payload.color.unwrap_or_default(),
+    };
+
+    state.write().unwrap().create_task(new_task);
+    (StatusCode::CREATED, "New task created").into_response()
 }

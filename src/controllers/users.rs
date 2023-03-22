@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     db::AppData,
-    user::{CreateUser, User},
+    user::{NewUser, User},
 };
 
 pub async fn get_users(state: Arc<RwLock<AppData>>) -> impl IntoResponse {
@@ -55,7 +55,7 @@ pub async fn remove_user_by_id(
 }
 
 pub async fn create_user(
-    Json(payload): Json<CreateUser>,
+    Json(payload): Json<NewUser>,
     state: Arc<RwLock<AppData>>,
 ) -> impl IntoResponse {
     let new_user = User {

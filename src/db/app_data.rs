@@ -1,3 +1,5 @@
+use crate::task::NewTask;
+use crate::user::NewUser;
 use crate::{comment::Comment, post::Post, task::Task, user::User};
 use rand::Rng;
 use serde::Deserialize;
@@ -26,12 +28,13 @@ impl AppData {
         user
     }
 
-    pub fn create_user(&mut self, new_user: User) {
-        self.users.push(new_user)
+    pub fn create_user(&mut self, new_user: User) -> User {
+        self.users.push(new_user.clone());
+        new_user
     }
 
     pub fn remove_user_by_id(&mut self, id: &Uuid) -> Option<User> {
-        // TODO: Delete all tasks, posts and comments from this user
+        // TODO: Delete all tasks, posts and comments from this user (or anonymize)
         let index = self.users.iter().position(|user| user.id == *id);
 
         match index {
@@ -84,23 +87,28 @@ impl AppData {
         Some(tasks.clone())
     }
 
+    pub fn create_task(&mut self, new_task: Task) -> Task {
+        self.tasks.push(new_task.clone());
+        new_task
+    }
+
     // ============================
     // Posts "collection" functions
     // ============================
 
-    fn get_posts(&self) -> &Vec<Task> {
-        todo!();
+    fn get_posts(&self) -> &Vec<Post> {
+        &self.posts
     }
 
     fn get_posts_by_id(&self, id: &Uuid) -> &Task {
         todo!();
     }
 
-    fn get_all_user_posts(&self, id: &Uuid) -> Option<&Vec<Task>> {
+    fn get_all_user_posts(&self, id: &Uuid) -> Option<&Vec<Post>> {
         todo!()
     }
 
-    fn remove_post_by_id(&self, id: &Uuid) -> Option<&Vec<Task>> {
+    fn remove_post_by_id(&self, id: &Uuid) -> Option<&Vec<Post>> {
         todo!()
     }
 
@@ -108,19 +116,19 @@ impl AppData {
     // Comments "collection" functions
     // ===============================
 
-    fn get_comments(&self) -> &Vec<Task> {
+    fn get_comments(&self) -> &Vec<Comment> {
+        &self.comments
+    }
+
+    fn get_comments_by_id(&self, id: &Uuid) -> &Comment {
         todo!();
     }
 
-    fn get_comments_by_id(&self, id: &Uuid) -> &Task {
-        todo!();
-    }
-
-    fn get_all_user_comments(&self, id: &Uuid) -> Option<&Vec<Task>> {
+    fn get_all_user_comments(&self, id: &Uuid) -> Option<&Vec<Comment>> {
         todo!()
     }
 
-    fn remove_comment_by_id(&self, id: &Uuid) -> Option<&Vec<Task>> {
+    fn remove_comment_by_id(&self, id: &Uuid) -> Option<&Vec<Comment>> {
         todo!()
     }
 }
