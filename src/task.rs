@@ -18,9 +18,10 @@ pub struct Task {
     pub name: String,
     pub status: TaskStatus,
     pub user: User,
-    pub started_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,  // This should be Optional
-    pub finished_at: DateTime<Utc>, // This should be Optional
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub started_at: Option<DateTime<Utc>>,
+    pub finished_at: Option<DateTime<Utc>>,
     pub color: String,
 }
 
@@ -30,16 +31,13 @@ pub enum TaskStatus {
     InProgress,
     NotNedeed,
     ReadyToStart,
+    Backlog,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct NewTask {
     pub name: String,
-    pub status: TaskStatus,
     pub user: User,
-    pub started_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-    pub finished_at: Option<DateTime<Utc>>,
     pub color: Option<String>,
 }
 
@@ -84,9 +82,10 @@ impl Task {
             name: Words(3..5).fake::<Vec<String>>().join(" "),
             status: TaskStatus::get_random_task_status(),
             user,
-            started_at: fake_initial_date,
+            created_at: Utc::now(),
+            started_at: Some(fake_initial_date),
             updated_at: fake_end_date,
-            finished_at: fake_end_date,
+            finished_at: Some(fake_end_date),
             color: rand::thread_rng()
                 .gen_range(0..(PROJECT_COLORS.len() - 1))
                 .to_string(),

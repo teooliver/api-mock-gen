@@ -6,18 +6,18 @@ mod post;
 mod task;
 mod user;
 
-use controllers::remove_task_by_id;
+use controllers::{remove_task_by_id, update_task};
 use db::AppData;
 use std::sync::{Arc, RwLock};
 
 use axum::{
-    routing::{delete, get, post},
+    routing::{delete, get, patch, post},
     Router,
 };
 use std::net::SocketAddr;
 
 use crate::controllers::{create_task, create_user, get_user_by_id, get_users, remove_user_by_id};
-use crate::controllers::{get_all_tasks_from_user, get_tasks};
+use crate::controllers::{get_all_tasks, get_all_tasks_from_user};
 use crate::db::generate_app_data;
 use crate::{controllers::get_task_by_id, helpers::generate_json_db};
 
@@ -95,7 +95,7 @@ async fn main() {
             "/tasks",
             get({
                 let shared_state = Arc::clone(&shared_state);
-                move || get_tasks(Arc::clone(&shared_state))
+                move || get_all_tasks(Arc::clone(&shared_state))
             }),
         )
         .route(
@@ -110,6 +110,13 @@ async fn main() {
             post({
                 let shared_state = Arc::clone(&shared_state);
                 move |body| create_task(body, Arc::clone(&shared_state))
+            }),
+        )
+        .route(
+            "/tasks/",
+            patch({
+                let shared_state = Arc::clone(&shared_state);
+                move |path| update_task(path, Arc::clone(&shared_state))
             }),
         )
         .route(

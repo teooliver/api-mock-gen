@@ -92,6 +92,21 @@ impl AppData {
         new_task
     }
 
+    pub fn update_task(&mut self, new_task: Task) -> Task {
+        // find task by id
+        // remove old task and insert new one
+        let id = new_task.id.clone();
+
+        for task in self.tasks.iter_mut() {
+            if task.id == id {
+                *task = new_task.clone();
+            }
+        }
+
+        // self.tasks.push(new_task.clone());
+        new_task
+    }
+
     // ============================
     // Posts "collection" functions
     // ============================

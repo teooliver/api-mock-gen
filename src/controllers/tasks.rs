@@ -7,10 +7,10 @@ use uuid::Uuid;
 
 use crate::{
     db::AppData,
-    task::{NewTask, Task},
+    task::{NewTask, Task, TaskStatus},
 };
 
-pub async fn get_tasks(state: Arc<RwLock<AppData>>) -> impl IntoResponse {
+pub async fn get_all_tasks(state: Arc<RwLock<AppData>>) -> impl IntoResponse {
     (StatusCode::OK, Json(state.read().unwrap().get_tasks())).into_response()
 }
 
@@ -84,14 +84,23 @@ pub async fn create_task(
     let new_task = Task {
         id: Uuid::new_v4(),
         name: payload.name,
-        status: payload.status,
         user: payload.user,
-        started_at: payload.started_at,
-        updated_at: payload.updated_at,
-        finished_at: payload.finished_at.unwrap_or_default(),
         color: payload.color.unwrap_or_default(),
+        status: TaskStatus::Backlog,
+        started_at: None,
+        created_at: Utc::now(),
+        updated_at: Utc::now(),
+        finished_at: None,
     };
 
     state.write().unwrap().create_task(new_task);
     (StatusCode::CREATED, "New task created").into_response()
+}
+
+pub async fn update_task(
+    Json(payload): Json<Task>,
+    state: Arc<RwLock<AppData>>,
+) -> impl IntoResponse {
+    state.write().unwrap().update_task(payload);
+    (StatusCode::CREATED, "Task updated").into_response()
 }
