@@ -49,13 +49,13 @@ async fn main() {
     // pass the db into the routes (so we dont have to move the shared_state
     // into each route one by one)
     let app = Router::new()
-        .route(
-            "/generate-data",
-            get({
-                let shared_state = Arc::clone(&shared_state);
-                move || get_users(Arc::clone(&shared_state))
-            }),
-        )
+        // .route(
+        //     "/generate-data",
+        //     get({
+        //         let shared_state = Arc::clone(&shared_state);
+        //         move || generate_data(Arc::clone(&shared_state))
+        //     }),
+        // )
         .route(
             "/users",
             get({
@@ -113,7 +113,7 @@ async fn main() {
             }),
         )
         .route(
-            "/tasks/",
+            "/tasks",
             patch({
                 let shared_state = Arc::clone(&shared_state);
                 move |path| update_task(path, Arc::clone(&shared_state))

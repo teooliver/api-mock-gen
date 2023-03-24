@@ -17,7 +17,7 @@ pub struct Task {
     pub id: Uuid,
     pub name: String,
     pub status: TaskStatus,
-    pub user: User,
+    pub user: User, // should be user_ref
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub started_at: Option<DateTime<Utc>>,
@@ -37,7 +37,7 @@ pub enum TaskStatus {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct NewTask {
     pub name: String,
-    pub user: User,
+    pub user: User, // should be user_ref
     pub color: Option<String>,
 }
 
