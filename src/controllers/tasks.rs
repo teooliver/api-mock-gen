@@ -2,7 +2,6 @@ use std::sync::{Arc, RwLock};
 
 use axum::{extract::Path, http::StatusCode, response::IntoResponse, Json};
 use chrono::Utc;
-use tracing::debug;
 use uuid::Uuid;
 
 use crate::{
