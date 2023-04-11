@@ -3,6 +3,7 @@ mod controllers;
 mod db;
 mod helpers;
 mod post;
+mod product;
 mod task;
 mod user;
 
@@ -15,6 +16,7 @@ use axum::{
     Router,
 };
 use std::net::SocketAddr;
+use tower_http::cors::{Any, CorsLayer};
 
 use crate::controllers::{create_task, create_user, get_user_by_id, get_users, remove_user_by_id};
 use crate::controllers::{get_all_tasks, get_all_tasks_from_user};
@@ -33,7 +35,7 @@ async fn main() {
     // QUESTION: Should the "collections" be created all in on json file,
     // or should we keep them separate
     // TODO: Serve those json files in routes, just as an example on how to
-    // serve files on axun. Could be also usefull as a way of grabing all info all at once
+    // serve files on axum. Could be also usefull as a way of grabing all info all at once
     // in the case we have one json file with all collections
     generate_json_db(&db.tasks, "mocked_db/tasks_json_db.json".to_string());
     generate_json_db(&db.users, "mocked_db/users_json_db.json".to_string());
@@ -43,6 +45,8 @@ async fn main() {
     // type Db = Arc<RwLock<AppData>>; ?
     // Explain in my own words why we need Arc and RwLock here
     let shared_state: Arc<RwLock<AppData>> = Arc::new(RwLock::new(db.clone()));
+
+    let cors = CorsLayer::new().allow_origin(Any);
 
     // TODO: use `merge` and `nest` so we can organize these routes
     // in separate files. Also use `layer` or write our own middleware to
@@ -105,6 +109,7 @@ async fn main() {
                 move |path| get_task_by_id(path, Arc::clone(&shared_state))
             }),
         )
+        .layer(cors)
         .route(
             "/tasks",
             post({

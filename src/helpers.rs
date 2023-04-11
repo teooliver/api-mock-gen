@@ -19,7 +19,7 @@ pub const TIME_IN_SECONDS_OPTIONS: [i32; 7] = [3600, 1800, 5400, 3450, 1600, 195
 
 pub fn generate_json_db<T: Serialize>(input: &Vec<T>, output_path: String) {
     // TODO: Instead of output path, we should write to the same path but grab the
-    // key we want to insert each "collection"
+    // key we want to insert each "collection" to.
 
     let mut writer = BufWriter::new(File::create(output_path).unwrap());
     serde_json::to_writer_pretty(&mut writer, &input).unwrap();
