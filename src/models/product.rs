@@ -24,6 +24,7 @@ pub struct ProductPrice {
 pub struct ProductReview {
     pub id: Uuid,
     pub title: String,
+    pub stars: u8, // 1 to 5
     pub content: String,
     pub user_ref: Uuid,
     pub product_ref: Uuid,

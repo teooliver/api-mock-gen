@@ -9,8 +9,9 @@ use serde::Serialize;
 use uuid::Uuid;
 
 use crate::helpers::TIME_IN_SECONDS_OPTIONS;
-use crate::post::Post;
-use crate::user::User;
+
+use super::Post;
+use super::User;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Comment {

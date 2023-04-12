@@ -1,10 +1,14 @@
-use crate::task::NewTask;
-use crate::user::NewUser;
-use crate::{comment::Comment, post::Post, task::Task, user::User};
+use std::vec;
+
 use rand::Rng;
 use serde::Deserialize;
 use serde::Serialize;
 use uuid::Uuid;
+
+use crate::models::Comment;
+use crate::models::Post;
+use crate::models::Task;
+use crate::models::User;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AppData {
@@ -15,9 +19,60 @@ pub struct AppData {
 }
 
 impl AppData {
+    pub fn change_app_state(&mut self) {
+        let new_state = Self::generate_app_data(100, 5);
+
+        self.users = new_state.users;
+        self.tasks = new_state.tasks;
+        self.comments = new_state.comments;
+        self.posts = new_state.posts;
+    }
+
+    // TODO: add amount of posts and amount_of_comments as "optional" params.
+    pub fn generate_app_data(amount_of_tasks: u8, amount_of_users: u8) -> Self {
+        let mut users: Vec<User> = vec![];
+        for _n in 1..=amount_of_users {
+            users.push(User::new_random_user());
+        }
+
+        let mut tasks: Vec<Task> = vec![];
+        for _n in 1..=amount_of_tasks {
+            tasks.push(Task::new_random_task(&Some(
+                users[rand::thread_rng().gen_range(0..users.len())].clone(),
+            )));
+        }
+
+        let mut posts: Vec<Post> = vec![];
+        for _n in 1..=20 {
+            posts.push(Post::new_random_post(&Some(
+                users[rand::thread_rng().gen_range(0..users.len())].clone(),
+            )));
+        }
+
+        let mut comments: Vec<Comment> = vec![];
+        for post in &posts {
+            for _n in 1..5 {
+                let user = &Some(users[rand::thread_rng().gen_range(0..users.len())].clone());
+                comments.push(Comment::new_random_comment(user, &post));
+            }
+        }
+
+        AppData {
+            tasks,
+            users,
+            posts,
+            comments,
+        }
+    }
+
     // ===========================
     // User "collection" functions
     // ===========================
+
+    pub fn drop_users(&mut self) -> &Vec<User> {
+        self.users = vec![];
+        &self.users
+    }
 
     pub fn get_users(&self) -> &Vec<User> {
         &self.users
@@ -49,6 +104,11 @@ impl AppData {
     // ============================
     // Tasks "collection" functions
     // ============================
+
+    pub fn drop_tasks(&mut self) -> &Vec<Task> {
+        self.tasks = vec![];
+        &self.tasks
+    }
 
     pub fn get_tasks(&self) -> &Vec<Task> {
         &self.tasks
@@ -111,6 +171,11 @@ impl AppData {
     // Posts "collection" functions
     // ============================
 
+    pub fn drop_posts(&mut self) -> &Vec<Post> {
+        self.posts = vec![];
+        &self.posts
+    }
+
     fn get_posts(&self) -> &Vec<Post> {
         &self.posts
     }
@@ -145,44 +210,5 @@ impl AppData {
 
     fn remove_comment_by_id(&self, id: &Uuid) -> Option<&Vec<Comment>> {
         todo!()
-    }
-}
-
-// Should this be a method of AppData instead? (So we can regenerate data at any time by calling an endpoint)
-// This way we can play with the data, delete, add and etc to the db, and then just call a endpoint to regenerate and start from scratch
-// TODO: add amount of posts and amount_of_comments as "optional" params.
-pub fn generate_app_data(amount_of_tasks: u8, amount_of_users: u8) -> AppData {
-    let mut users: Vec<User> = vec![];
-    for _n in 1..=amount_of_users {
-        users.push(User::new_random_user());
-    }
-
-    let mut tasks: Vec<Task> = vec![];
-    for _n in 1..=amount_of_tasks {
-        tasks.push(Task::new_random_task(&Some(
-            users[rand::thread_rng().gen_range(0..users.len())].clone(),
-        )));
-    }
-
-    let mut posts: Vec<Post> = vec![];
-    for _n in 1..=20 {
-        posts.push(Post::new_random_post(&Some(
-            users[rand::thread_rng().gen_range(0..users.len())].clone(),
-        )));
-    }
-
-    let mut comments: Vec<Comment> = vec![];
-    for post in &posts {
-        for _n in 1..5 {
-            let user = &Some(users[rand::thread_rng().gen_range(0..users.len())].clone());
-            comments.push(Comment::new_random_comment(user, &post));
-        }
-    }
-
-    AppData {
-        tasks,
-        users,
-        posts,
-        comments,
     }
 }

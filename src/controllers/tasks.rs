@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use crate::{
     db::AppData,
-    task::{NewTask, Task, TaskStatus},
+    models::{NewTask, Task, TaskStatus},
 };
 
 pub async fn get_all_tasks(state: Arc<RwLock<AppData>>) -> impl IntoResponse {

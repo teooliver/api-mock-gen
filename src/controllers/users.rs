@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     db::AppData,
-    user::{NewUser, User},
+    models::{NewUser, User},
 };
 
 pub async fn get_users(state: Arc<RwLock<AppData>>) -> impl IntoResponse {

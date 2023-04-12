@@ -9,9 +9,9 @@ use uuid::Uuid;
 
 use crate::helpers::PROJECT_COLORS;
 use crate::helpers::TIME_IN_SECONDS_OPTIONS;
-use crate::user::User;
 
-// TODO: add created_at
+use super::User;
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Task {
     pub id: Uuid,

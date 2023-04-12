@@ -1,13 +1,10 @@
 use std::sync::{Arc, RwLock};
 
-use axum::{extract::Path, http::StatusCode, response::IntoResponse, Json};
-use uuid::Uuid;
+use axum::{http::StatusCode, response::IntoResponse};
 
 use crate::db::AppData;
 
-pub async fn generate_mock_data(
-    Path(user_id): Path<String>,
-    state: Arc<RwLock<AppData>>,
-) -> impl IntoResponse {
-    todo!()
+pub async fn generate_mock_data(state: Arc<RwLock<AppData>>) -> impl IntoResponse {
+    state.write().unwrap().change_app_state();
+    (StatusCode::OK, "New DB state generated").into_response()
 }
