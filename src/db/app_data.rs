@@ -84,6 +84,7 @@ impl AppData {
     }
 
     pub fn create_user(&mut self, new_user: User) -> User {
+        // Ensure email is unique?
         self.users.push(new_user.clone());
         new_user
     }

@@ -2,11 +2,6 @@ mod controllers;
 mod db;
 mod helpers;
 mod models;
-// mod models;
-// mod post;
-// mod product;
-// mod task;
-// mod user;
 
 use controllers::{remove_task_by_id, update_task};
 use db::AppData;
@@ -24,8 +19,7 @@ use crate::controllers::{
     remove_user_by_id,
 };
 use crate::controllers::{get_all_tasks, get_all_tasks_from_user};
-// use crate::db::generate_app_data;
-use crate::{controllers::get_task_by_id, helpers::generate_json_db};
+use crate::{controllers::get_task_by_id, helpers::generate_json_file};
 
 // use axum_macros::debug_handler;
 
@@ -35,27 +29,25 @@ async fn main() {
 
     let in_memory_db = AppData::generate_app_data(100, 5);
 
-    // db::AppData::generate_app_data(100, 5);
-
     // TODO: Check if mocked_db folder exists, if not create it
     // QUESTION: Should the "collections" be created all in on json file,
     // or should we keep them separate
     // TODO: Serve those json files in routes, just as an example on how to
     // serve files on axum. Could be also usefull as a way of grabing all info all at once
     // in the case we have one json file with all collections
-    generate_json_db(
+    generate_json_file(
         &in_memory_db.tasks,
         "mocked_db/tasks_json_db.json".to_string(),
     );
-    generate_json_db(
+    generate_json_file(
         &in_memory_db.users,
         "mocked_db/users_json_db.json".to_string(),
     );
-    generate_json_db(
+    generate_json_file(
         &in_memory_db.posts,
         "mocked_db/posts_json_db.json".to_string(),
     );
-    generate_json_db(
+    generate_json_file(
         &in_memory_db.comments,
         "mocked_db/comments_json_db.json".to_string(),
     );

@@ -17,10 +17,14 @@ pub const PROJECT_COLORS: [&str; 10] = [
 
 pub const TIME_IN_SECONDS_OPTIONS: [i32; 7] = [3600, 1800, 5400, 3450, 1600, 1954, 7200];
 
-pub fn generate_json_db<T: Serialize>(input: &Vec<T>, output_path: String) {
+pub fn generate_json_file<T: Serialize>(input: &Vec<T>, output_path: String) {
     // TODO: Instead of output path, we should write to the same path but grab the
     // key we want to insert each "collection" to.
 
     let mut writer = BufWriter::new(File::create(output_path).unwrap());
     serde_json::to_writer_pretty(&mut writer, &input).unwrap();
+}
+
+pub fn write_struct_to_json<T>(input: T, output_path: String) {
+    todo!()
 }

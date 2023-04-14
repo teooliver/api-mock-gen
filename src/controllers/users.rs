@@ -42,7 +42,7 @@ pub async fn remove_user_by_id(
     let id = match id {
         Ok(id) => id,
         Err(_error) => {
-            return (StatusCode::BAD_REQUEST, "id not should be of type UUID").into_response();
+            return (StatusCode::BAD_REQUEST, "id should be of type UUID").into_response();
         }
     };
 
