@@ -80,12 +80,17 @@ pub async fn create_task(
     Json(payload): Json<NewTask>,
     state: Arc<RwLock<AppData>>,
 ) -> impl IntoResponse {
+    let status: TaskStatus = match payload.status {
+        Some(status) => TaskStatus::from(status.as_str()),
+        None => TaskStatus::Backlog,
+    };
+
     let new_task = Task {
         id: Uuid::new_v4(),
         name: payload.name,
-        user: payload.user,
+        user_ref: payload.user_ref,
         color: payload.color.unwrap_or_default(),
-        status: TaskStatus::Backlog,
+        status,
         started_at: None,
         created_at: Utc::now(),
         updated_at: Utc::now(),

@@ -136,7 +136,7 @@ impl AppData {
         // let task = self.tasks.iter().find(|task| task.id == *id).unwrap();
         let mut tasks: Vec<Task> = vec![];
         self.tasks.iter().for_each(|task| {
-            if task.user.id == *user_id {
+            if task.user_ref == *user_id {
                 tasks.push(task.clone())
             }
         });

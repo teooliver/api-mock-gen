@@ -13,19 +13,6 @@ use crate::helpers::TIME_IN_SECONDS_OPTIONS;
 use super::User;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Task {
-    pub id: Uuid,
-    pub name: String,
-    pub status: TaskStatus,
-    pub user: User, // should be user_ref
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-    pub started_at: Option<DateTime<Utc>>,
-    pub finished_at: Option<DateTime<Utc>>,
-    pub color: String,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum TaskStatus {
     Done,
     InProgress,
@@ -34,11 +21,16 @@ pub enum TaskStatus {
     Backlog,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct NewTask {
-    pub name: String,
-    pub user: User, // should be user_ref
-    pub color: Option<String>,
+impl From<&str> for TaskStatus {
+    fn from(s: &str) -> TaskStatus {
+        match s {
+            "Done" => TaskStatus::Done,
+            "InProgress" => TaskStatus::InProgress,
+            "NotNeeded" => TaskStatus::NotNedeed,
+            "ReadyToStart" => TaskStatus::ReadyToStart,
+            _ => TaskStatus::Backlog,
+        }
+    }
 }
 
 impl TaskStatus {
@@ -60,11 +52,24 @@ impl TaskStatus {
     }
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Task {
+    pub id: Uuid,
+    pub name: String,
+    pub status: TaskStatus,
+    pub user_ref: Uuid,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub started_at: Option<DateTime<Utc>>,
+    pub finished_at: Option<DateTime<Utc>>,
+    pub color: String,
+}
+
 impl Task {
     pub fn new_random_task(user: &Option<User>) -> Task {
-        let user = match user {
-            Some(u) => u.clone(),
-            None => User::new_random_user(),
+        let user_ref = match user {
+            Some(u) => u.clone().id,
+            None => User::new_random_user().id,
         };
 
         let random_amount_of_days = rand::thread_rng().gen_range(0..=10);
@@ -81,7 +86,7 @@ impl Task {
             id: Uuid::new_v4(),
             name: Words(3..5).fake::<Vec<String>>().join(" "),
             status: TaskStatus::get_random_task_status(),
-            user,
+            user_ref,
             created_at: Utc::now(),
             started_at: Some(fake_initial_date),
             updated_at: fake_end_date,
@@ -91,4 +96,12 @@ impl Task {
                 .to_string(),
         }
     }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct NewTask {
+    pub name: String,
+    pub user_ref: Uuid,
+    pub color: Option<String>,
+    pub status: Option<String>,
 }
