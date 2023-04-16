@@ -62,7 +62,7 @@ pub struct Task {
     pub updated_at: DateTime<Utc>,
     pub started_at: Option<DateTime<Utc>>,
     pub finished_at: Option<DateTime<Utc>>,
-    pub color: String,
+    pub color: Option<String>,
 }
 
 impl Task {
@@ -71,6 +71,9 @@ impl Task {
             Some(u) => u.clone().id,
             None => User::new_random_user().id,
         };
+        let color = rand::thread_rng()
+            .gen_range(0..(PROJECT_COLORS.len() - 1))
+            .to_string();
 
         let random_amount_of_days = rand::thread_rng().gen_range(0..=10);
         let amount_of_days = Duration::days(random_amount_of_days);
@@ -91,9 +94,7 @@ impl Task {
             started_at: Some(fake_initial_date),
             updated_at: fake_end_date,
             finished_at: Some(fake_end_date),
-            color: rand::thread_rng()
-                .gen_range(0..(PROJECT_COLORS.len() - 1))
-                .to_string(),
+            color: Some(color),
         }
     }
 }

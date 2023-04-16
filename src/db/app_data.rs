@@ -133,7 +133,6 @@ impl AppData {
     }
 
     pub fn get_all_user_tasks(&self, user_id: &Uuid) -> Option<Vec<Task>> {
-        // let task = self.tasks.iter().find(|task| task.id == *id).unwrap();
         let mut tasks: Vec<Task> = vec![];
         self.tasks.iter().for_each(|task| {
             if task.user_ref == *user_id {
@@ -154,17 +153,15 @@ impl AppData {
     }
 
     pub fn update_task(&mut self, new_task: Task) -> Task {
-        // find task by id
-        // remove old task and insert new one
         let id = new_task.id.clone();
 
+        // find task by id and mutate it for the new new one
         for task in self.tasks.iter_mut() {
             if task.id == id {
                 *task = new_task.clone();
             }
         }
 
-        // self.tasks.push(new_task.clone());
         new_task
     }
 

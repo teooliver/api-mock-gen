@@ -85,11 +85,13 @@ pub async fn create_task(
         None => TaskStatus::Backlog,
     };
 
+    let color = payload.color.unwrap_or_default();
+
     let new_task = Task {
         id: Uuid::new_v4(),
         name: payload.name,
         user_ref: payload.user_ref,
-        color: payload.color.unwrap_or_default(),
+        color: Some(color),
         status,
         started_at: None,
         created_at: Utc::now(),

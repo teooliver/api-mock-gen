@@ -46,6 +46,7 @@ pub async fn remove_user_by_id(
         }
     };
 
+    // Todo: Remove all tasks, posts or whatever data the user has, plus all related data like comments, etc)
     let user = state.write().unwrap().remove_user_by_id(&id);
 
     match user {
@@ -67,31 +68,3 @@ pub async fn create_user(
     state.write().unwrap().create_user(new_user);
     (StatusCode::CREATED, "New user created").into_response()
 }
-
-// ======================================================================
-// The query parameters for todos index
-// #[derive(Debug, Deserialize, Default)]
-// pub struct Pagination {
-//     pub offset: Option<usize>,
-//     pub limit: Option<usize>,
-// }
-
-// async fn todos_index(
-//     pagination: Option<Query<Pagination>>,
-//     State(db): State<Db>,
-// ) -> impl IntoResponse {
-//     let todos = db.read().unwrap();
-
-//     let Query(pagination) = pagination.unwrap_or_default();
-
-//     let todos = todos
-//         .values()
-//         .skip(pagination.offset.unwrap_or(0))
-//         .take(pagination.limit.unwrap_or(usize::MAX))
-//         .cloned()
-//         .collect::<Vec<_>>();
-
-//     Json(todos)
-// }
-
-// ======================================================================
