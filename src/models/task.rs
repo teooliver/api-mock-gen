@@ -55,7 +55,8 @@ impl TaskStatus {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Task {
     pub id: Uuid,
-    pub name: String,
+    pub title: String,
+    pub description: String,
     pub status: TaskStatus,
     pub user_ref: Uuid,
     pub created_at: DateTime<Utc>,
@@ -87,7 +88,8 @@ impl Task {
 
         Task {
             id: Uuid::new_v4(),
-            name: Words(3..5).fake::<Vec<String>>().join(" "),
+            title: Words(3..5).fake::<Vec<String>>().join(" "),
+            description: Words(3..10).fake::<Vec<String>>().join(" "),
             status: TaskStatus::get_random_task_status(),
             user_ref,
             created_at: Utc::now(),
@@ -101,7 +103,8 @@ impl Task {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct NewTask {
-    pub name: String,
+    pub title: String,
+    pub description: String,
     pub user_ref: Uuid,
     pub color: Option<String>,
     pub status: Option<String>,

@@ -89,7 +89,8 @@ pub async fn create_task(
 
     let new_task = Task {
         id: Uuid::new_v4(),
-        name: payload.name,
+        title: payload.title,
+        description: payload.description,
         user_ref: payload.user_ref,
         color: Some(color),
         status,

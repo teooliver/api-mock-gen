@@ -46,7 +46,7 @@ pub async fn remove_user_by_id(
         }
     };
 
-    // Todo: Remove all tasks, posts or whatever data the user has, plus all related data like comments, etc)
+    // TODO: Remove all tasks, posts or whatever data the user has, plus all related data like comments, etc)
     let user = state.write().unwrap().remove_user_by_id(&id);
 
     match user {
