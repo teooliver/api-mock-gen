@@ -8,7 +8,100 @@
 	"item": [
 		{
 			"name": "tasks",
-			"item": []
+			"item": [
+				{
+					"name": "/tasks - create_task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Test Task 1\",\n    \"description\": \"\",\n    \"user_ref\": \"8edd5530-60c8-4aea-9cee-e1cffd32b0c5\",\n    \"status\": \"Done\"\n}"
+						},
+						"url": {
+							"raw": "{{host}}/tasks",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/tasks - get_tasks",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/tasks",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{host}}/tasks/:id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/tasks/:id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tasks",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "{{host}}/tasks/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/tasks/:id",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tasks",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "users",
@@ -36,19 +129,13 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/users/:id",
+							"raw": "{{host}}/users/9c26b706-3ef7-4514-a251-2beb0a9871f9",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
 								"users",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": null
-								}
+								"9c26b706-3ef7-4514-a251-2beb0a9871f9"
 							]
 						}
 					},
@@ -60,11 +147,10 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:3000/users",
+							"raw": "{{host}}/users",
 							"host": [
-								"localhost"
+								"{{host}}"
 							],
-							"port": "3000",
 							"path": [
 								"users"
 							]
@@ -78,12 +164,20 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/users",
+							"raw": "{{host}}/users/:id/tasks",
 							"host": [
 								"{{host}}"
 							],
 							"path": [
-								"users"
+								"users",
+								":id",
+								"tasks"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": null
+								}
 							]
 						}
 					},
@@ -190,6 +284,12 @@
 					""
 				]
 			}
+		}
+	],
+	"variable": [
+		{
+			"key": "task_id",
+			"value": "d6f15518-a85e-41d3-b05c-2882f0d68ac1"
 		}
 	]
 }
