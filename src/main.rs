@@ -6,6 +6,7 @@ mod models;
 use controllers::{remove_task_by_id, update_task};
 use db::AppData;
 use std::sync::{Arc, RwLock};
+use tracing::{info, Level};
 
 use axum::{
     routing::{delete, get, patch, post},
@@ -25,7 +26,7 @@ use crate::{controllers::get_task_by_id, helpers::generate_json_file};
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt().with_max_level(Level::INFO).init();
 
     let in_memory_db = AppData::generate_app_data(100, 5);
 
@@ -144,9 +145,13 @@ async fn main() {
         );
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    tracing::debug!("listening on {}", addr);
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    // run our app with hyper, listening globally
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+
+    info!("listening on {}", addr);
+    axum::serve(listener, app).await.unwrap();
+    // axum::Server::bind(&addr)
+    //     .serve(app.into_make_service())
+    //     .await
+    //     .unwrap();
 }
