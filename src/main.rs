@@ -145,13 +145,8 @@ async fn main() {
         );
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    // run our app with hyper, listening globally
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
 
     info!("listening on {}", addr);
     axum::serve(listener, app).await.unwrap();
-    // axum::Server::bind(&addr)
-    //     .serve(app.into_make_service())
-    //     .await
-    //     .unwrap();
 }
