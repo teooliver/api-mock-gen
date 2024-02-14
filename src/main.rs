@@ -2,11 +2,13 @@ mod controllers;
 mod db;
 mod helpers;
 mod models;
+mod routes;
 
 use controllers::{remove_task_by_id, update_task};
 use db::AppData;
 use std::sync::{Arc, RwLock};
 use tracing::{info, Level};
+use tracing_subscriber::EnvFilter;
 
 use axum::{
     routing::{delete, get, patch, post},
@@ -26,7 +28,10 @@ use crate::{controllers::get_task_by_id, helpers::generate_json_file};
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt().with_max_level(Level::INFO).init();
+    tracing_subscriber::fmt()
+        .with_target(false)
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
 
     let in_memory_db = AppData::generate_app_data(100, 5);
 
