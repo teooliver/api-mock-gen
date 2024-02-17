@@ -35,7 +35,7 @@ impl From<&str> for TaskStatus {
 
 impl TaskStatus {
     fn get_random_task_status() -> TaskStatus {
-        // TODO: use this when stable so we dont have to
+        // TODO: upddate to `variant_count` when stable so we dont have to
         // hard code the enum length in the `gen_range`, that way we can
         // avoid breaking functionality with the enum changes.
         //
@@ -47,7 +47,7 @@ impl TaskStatus {
             1 => TaskStatus::InProgress,
             2 => TaskStatus::NotNedeed,
             3 => TaskStatus::ReadyToStart,
-            _ => TaskStatus::ReadyToStart,
+            _ => TaskStatus::Backlog,
         }
     }
 }
