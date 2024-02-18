@@ -1,3 +1,5 @@
 # Api Mock Gen
 
-An API to make it easier to start frontend projects for learning new frontend tech.
+An API to simplify starting frontend projects and learning new tech.
+
+Generate mock data sets to jump-start frontend projects.
