@@ -17,12 +17,18 @@ use axum::{
 use std::net::SocketAddr;
 use tower_http::cors::{Any, CorsLayer};
 
-use crate::controllers::{
-    create_task, create_user, generate_mock_data, get_user_by_id, get_users, health_check,
-    remove_user_by_id,
-};
-use crate::controllers::{get_all_tasks, get_all_tasks_from_user};
 use crate::{controllers::get_task_by_id, helpers::generate_json_file};
+use crate::{
+    controllers::{
+        create_task, create_user, generate_mock_data, get_user_by_id, get_users, health_check,
+        remove_user_by_id, search_tasks,
+    },
+    routes::task_routes,
+};
+use crate::{
+    controllers::{get_all_tasks, get_all_tasks_from_user},
+    routes::user_routes,
+};
 
 // use axum_macros::debug_handler;
 
@@ -77,79 +83,11 @@ async fn main() {
                 move || generate_mock_data(Arc::clone(&shared_state))
             }),
         )
-        .route(
-            "/users",
-            get({
-                let shared_state = Arc::clone(&shared_state);
-                move || get_users(Arc::clone(&shared_state))
-            }),
-        )
-        .route(
-            "/users/:id",
-            get({
-                let shared_state = Arc::clone(&shared_state);
-                move |path| get_user_by_id(path, Arc::clone(&shared_state))
-            }),
-        )
-        .route(
-            "/users",
-            post({
-                let shared_state = Arc::clone(&shared_state);
-                move |body| create_user(body, Arc::clone(&shared_state))
-            }),
-        )
-        .route(
-            "/users/:id",
-            delete({
-                let shared_state = Arc::clone(&shared_state);
-                move |path| remove_user_by_id(path, Arc::clone(&shared_state))
-            }),
-        )
-        .route(
-            "/users/:id/tasks",
-            get({
-                let shared_state = Arc::clone(&shared_state);
-                move |path| get_all_tasks_from_user(path, Arc::clone(&shared_state))
-            }),
-        )
-        .route(
-            "/tasks",
-            get({
-                let shared_state = Arc::clone(&shared_state);
-                move || get_all_tasks(Arc::clone(&shared_state))
-            }),
-        )
-        .route(
-            "/tasks/:id",
-            get({
-                let shared_state = Arc::clone(&shared_state);
-                move |path| get_task_by_id(path, Arc::clone(&shared_state))
-            }),
-        )
-        .layer(cors)
-        .route(
-            "/tasks",
-            post({
-                let shared_state = Arc::clone(&shared_state);
-                move |body| create_task(body, Arc::clone(&shared_state))
-            }),
-        )
-        .route(
-            "/tasks",
-            patch({
-                let shared_state = Arc::clone(&shared_state);
-                move |path| update_task(path, Arc::clone(&shared_state))
-            }),
-        )
-        .route(
-            "/tasks/:id",
-            delete({
-                let shared_state = Arc::clone(&shared_state);
-                move |path| remove_task_by_id(path, Arc::clone(&shared_state))
-            }),
-        );
+        .merge(user_routes(&shared_state))
+        .merge(task_routes(&shared_state))
+        .layer(cors);
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
 
     info!("listening on {}", addr);

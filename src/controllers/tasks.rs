@@ -1,7 +1,13 @@
 use std::sync::{Arc, RwLock};
 
-use axum::{extract::Path, http::StatusCode, response::IntoResponse, Json};
+use axum::{
+    extract::{Path, Query},
+    http::StatusCode,
+    response::IntoResponse,
+    Json,
+};
 use chrono::Utc;
+use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
@@ -11,6 +17,29 @@ use crate::{
 
 pub async fn get_all_tasks(state: Arc<RwLock<AppData>>) -> impl IntoResponse {
     (StatusCode::OK, Json(state.read().unwrap().get_tasks())).into_response()
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SearchTaskParams {
+    title: Option<String>,
+}
+
+pub async fn search_tasks(
+    Query(params): Query<SearchTaskParams>,
+    state: Arc<RwLock<AppData>>,
+) -> impl IntoResponse {
+    let tasks = state.read().unwrap();
+    let tasks = tasks.get_tasks();
+
+    let title = params.title.as_deref().unwrap_or("");
+    println!("{title:?}");
+
+    if title == "" {
+        return (StatusCode::OK, ()).into_response();
+    }
+
+    let task = tasks.iter().find(|x| x.title == title);
+    (StatusCode::OK, Json(task)).into_response()
 }
 
 pub async fn get_task_by_id(

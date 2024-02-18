@@ -24,3 +24,4 @@ tracing-subscriber = { version = "0.3", features = [
     "json",
 ] }
 httpc-test = "0.1.9"
+anyhow = "1.0.79"
