@@ -4,30 +4,20 @@ mod helpers;
 mod models;
 mod routes;
 
-use controllers::{remove_task_by_id, update_task};
 use db::AppData;
 use std::sync::{Arc, RwLock};
-use tracing::{info, Level};
+use tracing::info;
 use tracing_subscriber::EnvFilter;
 
-use axum::{
-    routing::{delete, get, patch, post},
-    Router,
-};
+use axum::{routing::get, Router};
 use std::net::SocketAddr;
 use tower_http::cors::{Any, CorsLayer};
 
-use crate::{controllers::get_task_by_id, helpers::generate_json_file};
+use crate::helpers::generate_json_file;
+use crate::routes::user_routes;
 use crate::{
-    controllers::{
-        create_task, create_user, generate_mock_data, get_user_by_id, get_users, health_check,
-        remove_user_by_id, search_tasks,
-    },
+    controllers::{generate_mock_data, health_check},
     routes::task_routes,
-};
-use crate::{
-    controllers::{get_all_tasks, get_all_tasks_from_user},
-    routes::user_routes,
 };
 
 // use axum_macros::debug_handler;
