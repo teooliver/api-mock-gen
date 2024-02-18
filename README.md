@@ -1,3 +1,3 @@
 # Api Mock Gen
 
-A simple API made to facilitate starting frontend projects for learning new frontend tech.
+An API to make it easier to start frontend projects for learning new frontend tech.

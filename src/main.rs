@@ -4,8 +4,10 @@ mod helpers;
 mod models;
 mod routes;
 
+use axum::routing::get_service;
 use db::AppData;
 use std::sync::{Arc, RwLock};
+use tower_http::services::ServeDir;
 use tracing::info;
 use tracing_subscriber::EnvFilter;
 
@@ -75,6 +77,7 @@ async fn main() {
         )
         .merge(user_routes(&shared_state))
         .merge(task_routes(&shared_state))
+        .fallback_service(routes_static())
         .layer(cors);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
@@ -82,4 +85,8 @@ async fn main() {
 
     info!("listening on {}", addr);
     axum::serve(listener, app).await.unwrap();
+}
+
+fn routes_static() -> Router {
+    Router::new().nest_service("/", get_service(ServeDir::new("./")))
 }
