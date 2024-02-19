@@ -1,8 +1,11 @@
 mod controllers;
 mod db;
+mod error;
 mod helpers;
 mod models;
 mod routes;
+
+pub use self::error::{Error, Result};
 
 use axum::routing::get_service;
 use db::AppData;
@@ -16,6 +19,7 @@ use std::net::SocketAddr;
 use tower_http::cors::{Any, CorsLayer};
 
 use crate::helpers::generate_json_file;
+use crate::routes::login_routes;
 use crate::routes::user_routes;
 use crate::{
     controllers::{generate_mock_data, health_check},
@@ -62,11 +66,7 @@ async fn main() {
 
     let cors = CorsLayer::new().allow_origin(Any);
 
-    // TODO: use `merge` and `nest` so we can organize these routes
-    // in separate files. Also use `layer` or write our own middleware to
-    // pass the db into the routes (so we dont have to move the shared_state
-    // into each route one by one)
-    let app = Router::new()
+    let api_routes = Router::new()
         .route("/health_check", get(move || health_check()))
         .route(
             "/regenerate_db",
@@ -75,10 +75,13 @@ async fn main() {
                 move || generate_mock_data(Arc::clone(&shared_state))
             }),
         )
+        .merge(login_routes())
         .merge(user_routes(&shared_state))
         .merge(task_routes(&shared_state))
         .fallback_service(routes_static())
         .layer(cors);
+
+    let app = Router::new().nest("/api/v1", api_routes);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();

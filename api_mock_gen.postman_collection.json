@@ -1,311 +1,265 @@
 {
-	"info": {
-		"_postman_id": "70921013-d1c4-4433-9b27-92544c54d1df",
-		"name": "api_mock_gen",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "6804429"
-	},
-	"item": [
-		{
-			"name": "tasks",
-			"item": [
-				{
-					"name": "/tasks - create_task",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"title\": \"Test Task 1\",\n    \"description\": \"\",\n    \"user_ref\": \"8edd5530-60c8-4aea-9cee-e1cffd32b0c5\",\n    \"status\": \"Done\"\n}"
-						},
-						"url": {
-							"raw": "{{host}}/tasks",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"tasks"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/tasks - get_tasks",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/tasks",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"tasks"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/tasks/:id - delete task",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/tasks/{{id}}",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"tasks",
-								"{{id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/tasks/:id - get task by id",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/tasks/:id",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"tasks",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": ""
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/search - search tasks",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/search?title=explicabo vitae temporibus",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"search"
-							],
-							"query": [
-								{
-									"key": "title",
-									"value": "explicabo vitae temporibus"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "users",
-			"item": [
-				{
-					"name": "/users - get_users",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/users",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/users/:id - remove_user_by_id",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/users/9c26b706-3ef7-4514-a251-2beb0a9871f9",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"users",
-								"9c26b706-3ef7-4514-a251-2beb0a9871f9"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/users/:id - get_user",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/users",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"users"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/users/:id/tasks - get_all_tasks_from_user",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/users/:id/tasks",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"users",
-								":id",
-								"tasks"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": null
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "/users - create_user",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n        \"name\": \"x\",\n        \"email\": \"x@test.com\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/users",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"users"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "posts",
-			"item": []
-		},
-		{
-			"name": "comments",
-			"item": []
-		},
-		{
-			"name": "general",
-			"item": [
-				{
-					"name": "regenerate_db",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/regenerate_db",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"regenerate_db"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "health_check",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{host}}/health_check",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"health_check"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		}
-	],
-	"variable": [
-		{
-			"key": "task_id",
-			"value": "d6f15518-a85e-41d3-b05c-2882f0d68ac1"
-		}
-	]
+  "info": {
+    "_postman_id": "70921013-d1c4-4433-9b27-92544c54d1df",
+    "name": "api_mock_gen",
+    "description": "[https://github.com/teooliver/api-mock-gen](https://github.com/teooliver/api-mock-gen)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "6804429"
+  },
+  "item": [
+    {
+      "name": "v1",
+      "item": [
+        {
+          "name": "tasks",
+          "item": [
+            {
+              "name": "/tasks - get_tasks",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{host}}/api/v1/tasks",
+                  "host": ["{{host}}"],
+                  "path": ["api", "v1", "tasks"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "/tasks/:id - delete task",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{host}}/api/v1/tasks/{{id}}",
+                  "host": ["{{host}}"],
+                  "path": ["api", "v1", "tasks", "{{id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "/tasks/:id - get task by id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{host}}/api/v1/tasks/:id",
+                  "host": ["{{host}}"],
+                  "path": ["api", "v1", "tasks", ":id"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "e4114eb0-42b5-46a2-be9b-2743ddcbb938"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "/search - search tasks",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{host}}/api/v1/search?title=e4114eb0-42b5-46a2-be9b-2743ddcbb938",
+                  "host": ["{{host}}"],
+                  "path": ["api", "v1", "search"],
+                  "query": [
+                    {
+                      "key": "title",
+                      "value": "e4114eb0-42b5-46a2-be9b-2743ddcbb938"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "/tasks - create_task",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"title\": \"Test Task 1\",\n    \"description\": \"\",\n    \"user_ref\": \"8edd5530-60c8-4aea-9cee-e1cffd32b0c5\",\n    \"status\": \"Done\"\n}"
+                },
+                "url": {
+                  "raw": "{{host}}/tasks",
+                  "host": ["{{host}}"],
+                  "path": ["tasks"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "users",
+          "item": [
+            {
+              "name": "/users - get_users",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{host}}/api/v1/users",
+                  "host": ["{{host}}"],
+                  "path": ["api", "v1", "users"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "/users/:id - remove_user_by_id",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{host}}/api/v1/users/9c26b706-3ef7-4514-a251-2beb0a9871f9",
+                  "host": ["{{host}}"],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "9c26b706-3ef7-4514-a251-2beb0a9871f9"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "/users/:id - get_user",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{host}}/api/v1/users",
+                  "host": ["{{host}}"],
+                  "path": ["api", "v1", "users"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "/users/:id/tasks - get_all_tasks_from_user",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{host}}/api/v1/users/:id/tasks",
+                  "host": ["{{host}}"],
+                  "path": ["api", "v1", "users", ":id", "tasks"],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": null
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "/users - create_user",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n        \"name\": \"x\",\n        \"email\": \"x@test.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{host}}/api/v1/users",
+                  "host": ["{{host}}"],
+                  "path": ["api", "v1", "users"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "posts",
+          "item": []
+        },
+        {
+          "name": "comments",
+          "item": []
+        },
+        {
+          "name": "general",
+          "item": [
+            {
+              "name": "regenerate_db",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{host}}/api/v1/regenerate_db",
+                  "host": ["{{host}}"],
+                  "path": ["api", "v1", "regenerate_db"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "health_check",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{host}}/api/v1/health_check",
+                  "host": ["{{host}}"],
+                  "path": ["api", "v1", "health_check"]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "task_id",
+      "value": "d6f15518-a85e-41d3-b05c-2882f0d68ac1"
+    }
+  ]
 }
