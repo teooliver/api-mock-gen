@@ -1,5 +1,5 @@
 [package]
-name = "rust-api-mock-gen"
+name = "api-mock-gen"
 version = "0.1.0"
 edition = "2021"
 
@@ -25,3 +25,4 @@ tracing-subscriber = { version = "0.3", features = [
 ] }
 httpc-test = "0.1.9"
 anyhow = "1.0.79"
+tower-cookies = "0.10.0"

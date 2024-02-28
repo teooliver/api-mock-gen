@@ -7,9 +7,13 @@ mod routes;
 
 pub use self::error::{Error, Result};
 
+use axum::middleware;
+use axum::response::Response;
 use axum::routing::get_service;
 use db::AppData;
+use std::fs;
 use std::sync::{Arc, RwLock};
+use tower_cookies::CookieManagerLayer;
 use tower_http::services::ServeDir;
 use tracing::info;
 use tracing_subscriber::EnvFilter;
@@ -28,6 +32,8 @@ use crate::{
 
 // use axum_macros::debug_handler;
 
+// TODO: Return Result from main
+
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt()
@@ -37,28 +43,7 @@ async fn main() {
 
     let in_memory_db = AppData::generate_app_data(100, 5);
 
-    // TODO: Check if mocked_db folder exists, if not create it
-    // QUESTION: Should the "collections" be created all in on json file,
-    // or should we keep them separate
-    // TODO: Serve those json files in routes, just as an example on how to
-    // serve files on axum. Could be also usefull as a way of grabing all info all at once
-    // in the case we have one json file with all collections
-    generate_json_file(
-        &in_memory_db.tasks,
-        "mocked_db/tasks_json_db.json".to_string(),
-    );
-    generate_json_file(
-        &in_memory_db.users,
-        "mocked_db/users_json_db.json".to_string(),
-    );
-    generate_json_file(
-        &in_memory_db.posts,
-        "mocked_db/posts_json_db.json".to_string(),
-    );
-    generate_json_file(
-        &in_memory_db.comments,
-        "mocked_db/comments_json_db.json".to_string(),
-    );
+    generate_json_files(&in_memory_db);
 
     // type Db = Arc<RwLock<AppData>>; ?
     // Explain in my own words why we need Arc and RwLock here
@@ -78,6 +63,8 @@ async fn main() {
         .merge(login_routes())
         .merge(user_routes(&shared_state))
         .merge(task_routes(&shared_state))
+        .layer(middleware::map_response(main_response_mapper))
+        .layer(CookieManagerLayer::new())
         .fallback_service(routes_static())
         .layer(cors);
 
@@ -92,4 +79,28 @@ async fn main() {
 
 fn routes_static() -> Router {
     Router::new().nest_service("/", get_service(ServeDir::new("./")))
+}
+
+fn generate_json_files(data: &AppData) {
+    // TODO: Deal with possible errors from create_dir
+    let _ = fs::create_dir("./mocked_db");
+    // QUESTION: Should the "collections" be created all in on json file,
+    // or should we keep them separate
+    // TODO: Serve those json files in routes, just as an example on how to
+    // serve files on axum. Could be also usefull as a way of grabing all info all at once
+    // in the case we have one json file with all collections
+    generate_json_file(&data.tasks, "mocked_db/tasks_json_db.json".to_string());
+    generate_json_file(&data.users, "mocked_db/users_json_db.json".to_string());
+    generate_json_file(&data.posts, "mocked_db/posts_json_db.json".to_string());
+    generate_json_file(
+        &data.comments,
+        "mocked_db/comments_json_db.json".to_string(),
+    );
+}
+
+async fn main_response_mapper(res: Response) -> Response {
+    println!("->> {:12} - main_resonse_mapper", "RES_MAPPER");
+
+    println!();
+    res
 }

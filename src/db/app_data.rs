@@ -120,6 +120,8 @@ impl AppData {
         task
     }
 
+    // TODO: Return DbResult instead of Option and return error
+    // if task is not found using db::error
     pub fn remove_task_by_id(&mut self, id: &Uuid) -> Option<Task> {
         let index = self.tasks.iter().position(|task| task.id == *id);
 
