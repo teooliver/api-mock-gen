@@ -23,8 +23,8 @@ use std::net::SocketAddr;
 use tower_http::cors::{Any, CorsLayer};
 
 use crate::helpers::generate_json_file;
-use crate::routes::login_routes;
 use crate::routes::user_routes;
+use crate::routes::{login_routes, mw_auth};
 use crate::{
     controllers::{generate_mock_data, health_check},
     routes::task_routes,
@@ -35,7 +35,7 @@ use crate::{
 // TODO: Return Result from main
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_target(false)
         .with_env_filter(EnvFilter::from_default_env())
@@ -51,6 +51,12 @@ async fn main() {
 
     let cors = CorsLayer::new().allow_origin(Any);
 
+    // Routes behing login
+    let protected_routes = Router::new()
+        .merge(user_routes(&shared_state))
+        .merge(task_routes(&shared_state))
+        .route_layer(middleware::from_fn(mw_auth::mw_require_auth));
+
     let api_routes = Router::new()
         .route("/health_check", get(move || health_check()))
         .route(
@@ -61,8 +67,7 @@ async fn main() {
             }),
         )
         .merge(login_routes())
-        .merge(user_routes(&shared_state))
-        .merge(task_routes(&shared_state))
+        .merge(protected_routes)
         .layer(middleware::map_response(main_response_mapper))
         .layer(CookieManagerLayer::new())
         .fallback_service(routes_static())
@@ -75,6 +80,8 @@ async fn main() {
 
     info!("listening on {}", addr);
     axum::serve(listener, app).await.unwrap();
+
+    Ok(())
 }
 
 fn routes_static() -> Router {

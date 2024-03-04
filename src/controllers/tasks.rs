@@ -105,7 +105,6 @@ pub async fn get_all_tasks_from_user(
     }
 }
 
-// TODO: Return Result<Json<Task>> instead
 pub async fn create_task(
     Json(payload): Json<NewTask>,
     state: Arc<RwLock<AppData>>,

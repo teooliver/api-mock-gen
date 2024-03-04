@@ -149,11 +149,16 @@ impl AppData {
         Some(tasks.clone())
     }
 
+    // TODO: Return Result<Task> instead
+    // TODO: Should we recieve the NewTask props and build the task here
+    // instead of in the router handler?
     pub fn create_task(&mut self, new_task: Task) -> Task {
         self.tasks.push(new_task.clone());
         new_task
     }
 
+    // TODO: Return Result<Task> instead as Task could not be found
+    // in that case throw an Error
     pub fn update_task(&mut self, new_task: Task) -> Task {
         let id = new_task.id.clone();
 

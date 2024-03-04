@@ -101,7 +101,7 @@ impl Task {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct NewTask {
     pub title: String,
     pub description: String,

@@ -1,6 +1,7 @@
 use std::sync::{Arc, RwLock};
 
 use axum::{
+    middleware,
     routing::{delete, get, patch, post},
     Router,
 };
@@ -11,6 +12,8 @@ use crate::{
     },
     db::AppData,
 };
+
+use super::mw_auth;
 
 pub fn task_routes(shared_state: &Arc<RwLock<AppData>>) -> Router {
     Router::new()

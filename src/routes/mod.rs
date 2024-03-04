@@ -1,5 +1,5 @@
 mod login_routes;
-mod mw_auth;
+pub mod mw_auth;
 mod task_routes;
 mod user_routes;
 
