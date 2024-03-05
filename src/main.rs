@@ -1,10 +1,10 @@
 mod controllers;
+mod ctx;
 mod db;
 mod error;
 mod helpers;
 mod models;
 mod routes;
-
 pub use self::error::{Error, Result};
 
 use axum::middleware;
@@ -32,8 +32,6 @@ use crate::{
 
 // use axum_macros::debug_handler;
 
-// TODO: Return Result from main
-
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt()
@@ -51,7 +49,7 @@ async fn main() -> Result<()> {
 
     let cors = CorsLayer::new().allow_origin(Any);
 
-    // Routes behing login
+    // Routes behind login
     let protected_routes = Router::new()
         .merge(user_routes(&shared_state))
         .merge(task_routes(&shared_state))

@@ -17,7 +17,10 @@ async fn api_login(cookies: Cookies, payload: Json<LoginPayload>) -> Result<Json
     }
 
     // TODO: Implement real auth-token generation/signature
-    cookies.add(Cookie::new(AUTH_TOKEN, "user-1.exp.sign"));
+    let mut cookie = Cookie::new(AUTH_TOKEN, "user-1.exp.sign");
+    cookie.set_http_only(true);
+    cookie.set_path("/");
+    cookies.add(cookie);
 
     // TODO: Set cookies
 
