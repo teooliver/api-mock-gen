@@ -1,21 +1,27 @@
+mod config;
 mod controllers;
 mod ctx;
 mod db;
 mod error;
 mod helpers;
+mod model_bmc;
 mod models;
 mod routes;
-pub use self::error::{Error, Result};
+pub use self::error::Error;
+use sqlx::types::Uuid;
 
-use axum::middleware;
-use axum::response::Response;
+pub mod _dev_utils;
+
+use axum::response::{IntoResponse, Response};
 use axum::routing::get_service;
+use axum::{middleware, Json};
 use db::AppData;
-use std::fs;
+use serde_json::json;
 use std::sync::{Arc, RwLock};
 use tower_cookies::CookieManagerLayer;
 use tower_http::services::ServeDir;
-use tracing::info;
+use tracing::{debug, info};
+use tracing_subscriber::fmt::format::json;
 use tracing_subscriber::EnvFilter;
 
 use axum::{routing::get, Router};
@@ -23,6 +29,8 @@ use std::net::SocketAddr;
 use tower_http::cors::{Any, CorsLayer};
 
 use crate::helpers::generate_json_file;
+use crate::model_bmc::ModelManager;
+use crate::routes::mw_auth::mw_ctx_resolver;
 use crate::routes::user_routes;
 use crate::routes::{login_routes, mw_auth};
 use crate::{
@@ -30,21 +38,25 @@ use crate::{
     routes::task_routes,
 };
 
+pub use config::Config;
 // use axum_macros::debug_handler;
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> Result<(), Error> {
     tracing_subscriber::fmt()
         .with_target(false)
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
-    let in_memory_db = AppData::generate_app_data(100, 5);
+    // -- FOR DEV ONLY
+    _dev_utils::init_dev().await;
 
-    generate_json_files(&in_memory_db);
+    let mm = ModelManager::new().await?;
 
     // type Db = Arc<RwLock<AppData>>; ?
     // Explain in my own words why we need Arc and RwLock here
+    let in_memory_db = AppData::generate_app_data(100, 5);
+    // generate_json_files(&in_memory_db);
     let shared_state: Arc<RwLock<AppData>> = Arc::new(RwLock::new(in_memory_db.clone()));
 
     let cors = CorsLayer::new().allow_origin(Any);
@@ -67,6 +79,7 @@ async fn main() -> Result<()> {
         .merge(login_routes())
         .merge(protected_routes)
         .layer(middleware::map_response(main_response_mapper))
+        .layer(middleware::from_fn(mw_ctx_resolver))
         .layer(CookieManagerLayer::new())
         .fallback_service(routes_static())
         .layer(cors);
@@ -86,26 +99,24 @@ fn routes_static() -> Router {
     Router::new().nest_service("/", get_service(ServeDir::new("./")))
 }
 
-fn generate_json_files(data: &AppData) {
-    // TODO: Deal with possible errors from create_dir
-    let _ = fs::create_dir("./mocked_db");
-    // QUESTION: Should the "collections" be created all in on json file,
-    // or should we keep them separate
-    // TODO: Serve those json files in routes, just as an example on how to
-    // serve files on axum. Could be also usefull as a way of grabing all info all at once
-    // in the case we have one json file with all collections
-    generate_json_file(&data.tasks, "mocked_db/tasks_json_db.json".to_string());
-    generate_json_file(&data.users, "mocked_db/users_json_db.json".to_string());
-    generate_json_file(&data.posts, "mocked_db/posts_json_db.json".to_string());
-    generate_json_file(
-        &data.comments,
-        "mocked_db/comments_json_db.json".to_string(),
-    );
-}
-
 async fn main_response_mapper(res: Response) -> Response {
-    println!("->> {:12} - main_resonse_mapper", "RES_MAPPER");
+    let uuid = Uuid::new_v4();
 
-    println!();
-    res
+    let service_error = res.extensions().get::<error::Error>();
+    let client_status_error = service_error.map(|se| se.client_status_and_error());
+
+    let error_reponse = client_status_error
+        .as_ref()
+        .map(|(status_code, client_error)| {
+            let client_error_body = json!({
+                "error":{
+                    "type": client_error.as_ref(),
+                    "req_uuid": uuid.to_string(),
+                }
+            });
+            println!("    ->> client_error_body: {client_error_body}");
+            (*status_code, Json(client_error_body)).into_response()
+        });
+    debug!("server log line -  {uuid} - Error: {service_error:?}");
+    error_reponse.unwrap_or(res)
 }
