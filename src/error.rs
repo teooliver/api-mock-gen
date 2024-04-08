@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use derive_more::From;
@@ -6,7 +8,7 @@ use serde::Serialize;
 use crate::model_bmc;
 pub type Result<T> = core::result::Result<T, Error>;
 
-#[derive(Clone, Debug, From, Serialize, strum_macros::AsRefStr)]
+#[derive(Debug, From, Serialize, strum_macros::AsRefStr)]
 #[serde(tag = "type", content = "data")]
 pub enum Error {
     // -- Modules
@@ -20,6 +22,7 @@ pub enum Error {
     AuthFailTokenWrongFormat,
     AuthFailTokenUserIdWrongFormat,
     AuthFailCtxNotInRequestExt,
+    CtxCannotNewRootCtx,
 
     // -- Model errors.
     TicketDeleteFailIdNotFound {
@@ -40,7 +43,7 @@ impl IntoResponse for Error {
         let mut response = StatusCode::INTERNAL_SERVER_ERROR.into_response();
 
         // Insert the Error into the reponse.
-        response.extensions_mut().insert(self);
+        response.extensions_mut().insert(Arc::new(self));
 
         response
     }

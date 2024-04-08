@@ -2,7 +2,7 @@ mod error;
 
 pub use self::error::{Error, Result};
 
-use crate::config::{self, config};
+use crate::config::config;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
 

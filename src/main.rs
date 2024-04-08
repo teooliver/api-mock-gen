@@ -7,6 +7,7 @@ mod helpers;
 mod model_bmc;
 mod models;
 mod routes;
+
 pub use self::error::Error;
 use sqlx::types::Uuid;
 
@@ -30,7 +31,8 @@ use tower_http::cors::{Any, CorsLayer};
 
 use crate::helpers::generate_json_file;
 use crate::model_bmc::ModelManager;
-use crate::routes::mw_auth::mw_ctx_resolver;
+// use crate::routes::mw_auth::mw_ctx_resolver;
+
 use crate::routes::user_routes;
 use crate::routes::{login_routes, mw_auth};
 use crate::{
@@ -64,8 +66,8 @@ async fn main() -> Result<(), Error> {
     // Routes behind login
     let protected_routes = Router::new()
         .merge(user_routes(&shared_state))
-        .merge(task_routes(&shared_state))
-        .route_layer(middleware::from_fn(mw_auth::mw_require_auth));
+        .merge(task_routes(&shared_state));
+    // .route_layer(middleware::from_fn(mw_auth::mw_require_auth));
 
     let api_routes = Router::new()
         .route("/health_check", get(move || health_check()))
@@ -79,8 +81,8 @@ async fn main() -> Result<(), Error> {
         .merge(login_routes())
         .merge(protected_routes)
         .layer(middleware::map_response(main_response_mapper))
-        .layer(middleware::from_fn(mw_ctx_resolver))
-        .layer(CookieManagerLayer::new())
+        // .layer(middleware::from_fn(mw_ctx_resolver))
+        // .layer(CookieManagerLayer::new())
         .fallback_service(routes_static())
         .layer(cors);
 
