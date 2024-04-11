@@ -41,9 +41,4 @@ fn generate_json_files(data: &AppData) {
     // in the case we have one json file with all collections
     generate_json_file(&data.tasks, "mocked_db/tasks_json_db.json".to_string());
     generate_json_file(&data.users, "mocked_db/users_json_db.json".to_string());
-    generate_json_file(&data.posts, "mocked_db/posts_json_db.json".to_string());
-    generate_json_file(
-        &data.comments,
-        "mocked_db/comments_json_db.json".to_string(),
-    );
 }

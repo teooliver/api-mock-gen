@@ -5,8 +5,6 @@ use serde::Deserialize;
 use serde::Serialize;
 use uuid::Uuid;
 
-use crate::models::Comment;
-use crate::models::Post;
 use crate::models::Task;
 use crate::models::User;
 
@@ -14,8 +12,6 @@ use crate::models::User;
 pub struct AppData {
     pub tasks: Vec<Task>,
     pub users: Vec<User>,
-    pub posts: Vec<Post>,
-    pub comments: Vec<Comment>,
 }
 
 impl AppData {
@@ -24,8 +20,6 @@ impl AppData {
 
         self.users = new_state.users;
         self.tasks = new_state.tasks;
-        self.comments = new_state.comments;
-        self.posts = new_state.posts;
     }
 
     // TODO: add amount of posts and amount_of_comments as "optional" params.
@@ -42,27 +36,7 @@ impl AppData {
             )));
         }
 
-        let mut posts: Vec<Post> = vec![];
-        for _n in 1..=20 {
-            posts.push(Post::new_random_post(&Some(
-                users[rand::thread_rng().gen_range(0..users.len())].clone(),
-            )));
-        }
-
-        let mut comments: Vec<Comment> = vec![];
-        for post in &posts {
-            for _n in 1..5 {
-                let user = &Some(users[rand::thread_rng().gen_range(0..users.len())].clone());
-                comments.push(Comment::new_random_comment(user, &post));
-            }
-        }
-
-        AppData {
-            tasks,
-            users,
-            posts,
-            comments,
-        }
+        AppData { tasks, users }
     }
 
     // ===========================
@@ -170,50 +144,5 @@ impl AppData {
         }
 
         new_task
-    }
-
-    // ============================
-    // Posts "collection" functions
-    // ============================
-
-    pub fn drop_posts(&mut self) -> &Vec<Post> {
-        self.posts = vec![];
-        &self.posts
-    }
-
-    fn get_posts(&self) -> &Vec<Post> {
-        &self.posts
-    }
-
-    fn get_posts_by_id(&self, id: &Uuid) -> &Task {
-        todo!();
-    }
-
-    fn get_all_user_posts(&self, id: &Uuid) -> Option<&Vec<Post>> {
-        todo!()
-    }
-
-    fn remove_post_by_id(&self, id: &Uuid) -> Option<&Vec<Post>> {
-        todo!()
-    }
-
-    // ===============================
-    // Comments "collection" functions
-    // ===============================
-
-    fn get_comments(&self) -> &Vec<Comment> {
-        &self.comments
-    }
-
-    fn get_comments_by_id(&self, id: &Uuid) -> &Comment {
-        todo!();
-    }
-
-    fn get_all_user_comments(&self, id: &Uuid) -> Option<&Vec<Comment>> {
-        todo!()
-    }
-
-    fn remove_comment_by_id(&self, id: &Uuid) -> Option<&Vec<Comment>> {
-        todo!()
     }
 }

@@ -1,7 +1,11 @@
+use crate::{ctx::Ctx, helpers::PROJECT_COLORS, model_bmc::TaskBmc};
+use fake::faker::lorem::en::*;
+use fake::Fake;
+use rand::Rng;
 use tokio::sync::OnceCell;
 use tracing::info;
 
-use crate::model_bmc::ModelManager;
+use crate::model_bmc::{self, ModelManager, Task, TaskForCreate};
 
 mod dev_db;
 
@@ -26,4 +30,30 @@ pub async fn init_test() -> ModelManager {
         .await;
 
     mm.clone()
+}
+
+pub async fn seed_tasks(ctx: &Ctx, mm: &ModelManager) -> model_bmc::Result<Vec<Task>> {
+    let mut tasks: Vec<Task> = vec![];
+    for _n in 1..=20 {
+        let random_task = new_random_task();
+        let id = TaskBmc::create(ctx, mm, random_task).await?;
+        let task = TaskBmc::get(ctx, mm, id).await?;
+
+        tasks.push(task);
+    }
+
+    Ok(tasks)
+}
+
+pub fn new_random_task() -> TaskForCreate {
+    let color = rand::thread_rng()
+        .gen_range(0..(PROJECT_COLORS.len() - 1))
+        .to_string();
+
+    TaskForCreate {
+        title: Words(3..5).fake::<Vec<String>>().join(" "),
+        description: Some(Words(3..10).fake::<Vec<String>>().join(" ")),
+        status: None,
+        color: Some(color),
+    }
 }

@@ -1,25 +1,21 @@
 use crate::ctx::Ctx;
 use crate::model_bmc::ModelManager;
-use crate::model_bmc::Result;
+use crate::model_bmc::{Error, Result};
 use chrono::DateTime;
 use chrono::Utc;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
+use serial_test::serial;
 use sqlx::FromRow;
 use strum_macros::Display;
 use uuid::Uuid;
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, sqlx::FromRow)]
 pub struct Task {
     pub id: Uuid,
     pub title: String,
     pub description: Option<String>,
-    pub status: TaskStatus,
-    pub assigned_to: Option<Uuid>,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-    pub started_at: Option<DateTime<Utc>>,
-    pub finished_at: Option<DateTime<Utc>>,
+    pub status: Option<String>,
     pub color: Option<String>,
 }
 
@@ -27,8 +23,7 @@ pub struct Task {
 pub struct TaskForCreate {
     pub title: String,
     pub description: Option<String>,
-    pub status: TaskStatus,
-    pub assigned_to: Option<Uuid>,
+    pub status: Option<String>,
     pub color: Option<String>,
 }
 
@@ -36,50 +31,8 @@ pub struct TaskForCreate {
 pub struct TaskForUpdate {
     pub title: Option<String>,
     pub description: Option<String>,
-    pub status: Option<TaskStatus>,
-    pub assigned_to: Option<Uuid>,
-    pub started_at: Option<DateTime<Utc>>,
-    pub finished_at: Option<DateTime<Utc>>,
+    pub status: Option<String>,
     pub color: Option<String>,
-}
-
-#[derive(Clone, Display, Debug, Deserialize, Serialize)]
-pub enum TaskStatus {
-    Done,
-    InProgress,
-    NotNedeed,
-    ReadyToStart,
-    Backlog,
-}
-
-impl From<&str> for TaskStatus {
-    fn from(s: &str) -> TaskStatus {
-        match s {
-            "Done" => TaskStatus::Done,
-            "InProgress" => TaskStatus::InProgress,
-            "NotNeeded" => TaskStatus::NotNedeed,
-            "ReadyToStart" => TaskStatus::ReadyToStart,
-            _ => TaskStatus::Backlog,
-        }
-    }
-}
-
-impl TaskStatus {
-    fn get_random_task_status() -> TaskStatus {
-        // TODO: upddate to `variant_count` when stable so we dont have to
-        // hard code the enum length in the `gen_range`, that way we can
-        // avoid breaking functionality with the enum changes.
-        //
-        // https://github.com/rust-lang/rust/issues/73662
-        // let enum_length = mem::variant_count::<TaskStatus>();
-        match rand::thread_rng().gen_range(0..=3) {
-            0 => TaskStatus::Done,
-            1 => TaskStatus::InProgress,
-            2 => TaskStatus::NotNedeed,
-            3 => TaskStatus::ReadyToStart,
-            _ => TaskStatus::Backlog,
-        }
-    }
 }
 
 pub struct TaskBmc;
@@ -90,22 +43,54 @@ impl TaskBmc {
         let (id,) = sqlx::query_as::<_, (Uuid,)>(
             "INSERT INTO task (
             title,
-            description,
-            status,
-            assigned_to,
-            color,
+            description
             )
-            values ($1, $2, $3, $4, $5) return id",
+            values ($1, $2) RETURNING id",
         )
         .bind(task_c.title)
         .bind(task_c.description)
-        .bind(task_c.status.to_string())
-        .bind(task_c.assigned_to)
-        .bind(task_c.color)
         .fetch_one(db)
         .await?;
 
         Ok(id)
+    }
+    // 1.07:46
+    pub async fn get(_ctx: &Ctx, mm: &ModelManager, id: Uuid) -> Result<Task> {
+        let db = mm.db();
+
+        let task: Task = sqlx::query_as("SELECT * FROM task WHERE id = $1")
+            .bind(id)
+            .fetch_optional(db)
+            .await?
+            .ok_or(Error::EntityNotFound { entity: "task", id })?;
+
+        Ok(task)
+    }
+
+    pub async fn list(_ctx: &Ctx, mm: &ModelManager) -> Result<Vec<Task>> {
+        let db = mm.db();
+
+        let tasks: Vec<Task> = sqlx::query_as("SELECT * FROM task ORDER by title LIMIT 10")
+            .fetch_all(db)
+            .await?;
+
+        Ok(tasks)
+    }
+
+    pub async fn delete(_ctx: &Ctx, mm: &ModelManager, id: Uuid) -> Result<()> {
+        let db = mm.db();
+
+        let count = sqlx::query("DELETE FROM task WHERE id = $1")
+            .bind(id)
+            .execute(db)
+            .await?
+            .rows_affected();
+
+        if count == 0 {
+            return Err(Error::EntityNotFound { entity: "task", id });
+        }
+
+        Ok(())
     }
 }
 
@@ -121,24 +106,26 @@ mod tests {
         let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
 
-        let task_title = "Some Title";
+        let task_title = "Some Title 2";
 
         let task_c = TaskForCreate {
             title: task_title.to_string(),
-            description: Some("Some Description".to_string()),
-            status: TaskStatus::Backlog,
-            assigned_to: None,
+            description: Some("Some Description 2".to_string()),
+            status: None,
             color: None,
         };
 
         let id = TaskBmc::create(&ctx, &mm, task_c).await?;
 
-        let (title,): (String,) = sqlx::query_as("SELECT title from task where id = $1")
+        let (title,): (String,) = sqlx::query_as("SELECT title FROM task WHERE id = $1")
             .bind(id)
             .fetch_one(mm.db())
             .await?;
 
         assert_eq!(title, task_title);
+
+        let task = TaskBmc::get(&ctx, &mm, id).await?;
+        assert_eq!(task.title, task_title);
 
         // -- Clean
         let count = sqlx::query("DELETE FROM task WHERE id = $1")
@@ -149,5 +136,44 @@ mod tests {
         assert_eq!(count, 1, "Did not delete 1 row?");
 
         Ok(())
+    }
+
+    #[serial]
+    #[tokio::test]
+    async fn test_get_err_not_found() -> Result<()> {
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+        let id: Uuid = Uuid::try_parse("2be8791f-f9b9-48bc-85e3-818183c6deac").unwrap();
+        let res = TaskBmc::get(&ctx, &mm, id).await;
+
+        assert!(
+            matches!(res, Err(Error::EntityNotFound { entity: "task", id })),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+
+    #[serial]
+    #[tokio::test]
+    async fn test_delete_err_not_found() -> Result<()> {
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+        let id: Uuid = Uuid::try_parse("26af6714-7734-4ebf-9474-23af4f481688").unwrap();
+        let res = TaskBmc::delete(&ctx, &mm, id).await;
+
+        println!("{:?}", res);
+        assert!(
+            matches!(res, Err(Error::EntityNotFound { entity: "task", id })),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+
+    #[serial]
+    #[tokio::test]
+    async fn test_list_ok() -> Result<()> {
+        todo!()
     }
 }

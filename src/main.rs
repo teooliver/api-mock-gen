@@ -29,6 +29,7 @@ use axum::{routing::get, Router};
 use std::net::SocketAddr;
 use tower_http::cors::{Any, CorsLayer};
 
+use crate::ctx::Ctx;
 use crate::helpers::generate_json_file;
 use crate::model_bmc::ModelManager;
 // use crate::routes::mw_auth::mw_ctx_resolver;
@@ -52,8 +53,9 @@ async fn main() -> Result<(), Error> {
 
     // -- FOR DEV ONLY
     _dev_utils::init_dev().await;
-
     let mm = ModelManager::new().await?;
+    let ctx = Ctx::root_ctx();
+    _dev_utils::seed_tasks(&ctx, &mm).await?;
 
     // type Db = Arc<RwLock<AppData>>; ?
     // Explain in my own words why we need Arc and RwLock here
