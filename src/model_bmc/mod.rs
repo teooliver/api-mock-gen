@@ -3,6 +3,7 @@
 mod error;
 mod store;
 mod task;
+mod user;
 
 pub use task::*;
 
