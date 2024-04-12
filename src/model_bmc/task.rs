@@ -70,11 +70,34 @@ impl TaskBmc {
     pub async fn list(_ctx: &Ctx, mm: &ModelManager) -> Result<Vec<Task>> {
         let db = mm.db();
 
-        let tasks: Vec<Task> = sqlx::query_as("SELECT * FROM task ORDER by title LIMIT 10")
+        let tasks: Vec<Task> = sqlx::query_as("SELECT * FROM task ORDER by title LIMIT 30")
             .fetch_all(db)
             .await?;
 
         Ok(tasks)
+    }
+
+    pub async fn update(
+        _ctx: &Ctx,
+        mm: &ModelManager,
+        id: Uuid,
+        task: TaskForUpdate,
+    ) -> Result<bool> {
+        let db = mm.db();
+
+        let rows_affected = sqlx::query!(
+            r#"UPDATE task
+            SET title = $1, description = $2
+            WHERE id = $3"#,
+            task.title,
+            task.description,
+            id
+        )
+        .execute(db)
+        .await?
+        .rows_affected();
+
+        Ok(rows_affected > 0)
     }
 
     pub async fn delete(_ctx: &Ctx, mm: &ModelManager, id: Uuid) -> Result<()> {
@@ -101,6 +124,8 @@ mod tests {
     use super::*;
     use anyhow::Result;
 
+    // TODO: Check why Serial is breaking the tests
+    // #[serial]
     #[tokio::test]
     async fn test_create_ok() -> Result<()> {
         let mm = _dev_utils::init_test().await;
@@ -133,12 +158,13 @@ mod tests {
             .execute(mm.db())
             .await?
             .rows_affected();
+
         assert_eq!(count, 1, "Did not delete 1 row?");
 
         Ok(())
     }
 
-    #[serial]
+    // #[serial]
     #[tokio::test]
     async fn test_get_err_not_found() -> Result<()> {
         let mm = _dev_utils::init_test().await;
@@ -154,26 +180,34 @@ mod tests {
         Ok(())
     }
 
-    #[serial]
+    // #[serial]
+    #[tokio::test]
+    async fn test_list_ok() -> Result<()> {
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+        // _dev_utils::seed_tasks(&ctx, &mm, Some(20)).await?;
+
+        let tasks = TaskBmc::list(&ctx, &mm).await?;
+
+        assert!(tasks.len() >= 1);
+
+        Ok(())
+    }
+
+    // #[serial]
     #[tokio::test]
     async fn test_delete_err_not_found() -> Result<()> {
         let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let id: Uuid = Uuid::try_parse("26af6714-7734-4ebf-9474-23af4f481688").unwrap();
+
         let res = TaskBmc::delete(&ctx, &mm, id).await;
 
-        println!("{:?}", res);
         assert!(
             matches!(res, Err(Error::EntityNotFound { entity: "task", id })),
             "EntityNotFound not matching"
         );
 
         Ok(())
-    }
-
-    #[serial]
-    #[tokio::test]
-    async fn test_list_ok() -> Result<()> {
-        todo!()
     }
 }

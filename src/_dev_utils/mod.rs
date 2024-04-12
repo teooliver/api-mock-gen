@@ -32,9 +32,18 @@ pub async fn init_test() -> ModelManager {
     mm.clone()
 }
 
-pub async fn seed_tasks(ctx: &Ctx, mm: &ModelManager) -> model_bmc::Result<Vec<Task>> {
+pub async fn seed_tasks(
+    ctx: &Ctx,
+    mm: &ModelManager,
+    amount: Option<i8>,
+) -> model_bmc::Result<Vec<Task>> {
+    let amount_of_tasks = match amount {
+        Some(amount) => amount,
+        None => 20,
+    };
+
     let mut tasks: Vec<Task> = vec![];
-    for _n in 1..=20 {
+    for _n in 1..=amount_of_tasks {
         let random_task = new_random_task();
         let id = TaskBmc::create(ctx, mm, random_task).await?;
         let task = TaskBmc::get(ctx, mm, id).await?;
@@ -56,4 +65,8 @@ pub fn new_random_task() -> TaskForCreate {
         status: None,
         color: Some(color),
     }
+}
+
+pub fn dangerously_drop_table() {
+    todo!()
 }

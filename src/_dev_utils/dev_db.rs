@@ -18,16 +18,16 @@ pub async fn init_dev_db() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-async fn pexec(db: &Db) -> Result<(), sqlx::Error> {
-    info!("{:<12} - pexec ", "FOR DEV ONLY");
-    sqlx::migrate!().run(db).await?;
-    Ok(())
-}
-
 async fn new_db_pool(db_con_url: &str) -> Result<Db, sqlx::Error> {
     PgPoolOptions::new()
         .max_connections(1)
         .acquire_timeout(Duration::from_millis(500))
         .connect(db_con_url)
         .await
+}
+
+async fn pexec(db: &Db) -> Result<(), sqlx::Error> {
+    info!("{:<12} - pexec ", "FOR DEV ONLY");
+    sqlx::migrate!().run(db).await?;
+    Ok(())
 }
