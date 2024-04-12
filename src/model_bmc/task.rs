@@ -82,7 +82,7 @@ impl TaskBmc {
         mm: &ModelManager,
         id: Uuid,
         task: TaskForUpdate,
-    ) -> Result<bool> {
+    ) -> Result<()> {
         let db = mm.db();
 
         let rows_affected = sqlx::query!(
@@ -97,7 +97,11 @@ impl TaskBmc {
         .await?
         .rows_affected();
 
-        Ok(rows_affected > 0)
+        if rows_affected == 0 {
+            return Err(Error::EntityNotFound { entity: "task", id });
+        }
+
+        Ok(())
     }
 
     pub async fn delete(_ctx: &Ctx, mm: &ModelManager, id: Uuid) -> Result<()> {
@@ -119,7 +123,7 @@ impl TaskBmc {
 
 #[cfg(test)]
 mod tests {
-    use crate::_dev_utils;
+    use crate::_dev_utils::{self, new_random_task};
 
     use super::*;
     use anyhow::Result;
@@ -190,6 +194,37 @@ mod tests {
         let tasks = TaskBmc::list(&ctx, &mm).await?;
 
         assert!(tasks.len() >= 1);
+
+        Ok(())
+    }
+
+    // #[serial]
+    #[tokio::test]
+    async fn test_update_ok() -> Result<()> {
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+
+        let fx_title = "test_update_ok - task 01".to_string();
+        let fx_title_new = "test_update_ok - task 01 - new".to_string();
+
+        let random_task = new_random_task(Some(fx_title));
+        let task_updated = TaskForUpdate {
+            title: Some(fx_title_new.clone()),
+            description: random_task.description.clone(),
+            color: None,
+            status: None,
+        };
+
+        let id = TaskBmc::create(&ctx, &mm, random_task).await?;
+
+        TaskBmc::update(&ctx, &mm, id, task_updated).await?;
+
+        let (title,): (String,) = sqlx::query_as("SELECT title FROM task WHERE id = $1")
+            .bind(id)
+            .fetch_one(mm.db())
+            .await?;
+
+        assert_eq!(title, fx_title_new);
 
         Ok(())
     }

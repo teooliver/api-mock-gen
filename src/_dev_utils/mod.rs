@@ -44,7 +44,7 @@ pub async fn seed_tasks(
 
     let mut tasks: Vec<Task> = vec![];
     for _n in 1..=amount_of_tasks {
-        let random_task = new_random_task();
+        let random_task = new_random_task(None);
         let id = TaskBmc::create(ctx, mm, random_task).await?;
         let task = TaskBmc::get(ctx, mm, id).await?;
 
@@ -54,13 +54,18 @@ pub async fn seed_tasks(
     Ok(tasks)
 }
 
-pub fn new_random_task() -> TaskForCreate {
+pub fn new_random_task(title: Option<String>) -> TaskForCreate {
     let color = rand::thread_rng()
         .gen_range(0..(PROJECT_COLORS.len() - 1))
         .to_string();
 
+    let title = match title {
+        Some(title) => title,
+        None => Words(3..5).fake::<Vec<String>>().join(" "),
+    };
+
     TaskForCreate {
-        title: Words(3..5).fake::<Vec<String>>().join(" "),
+        title,
         description: Some(Words(3..10).fake::<Vec<String>>().join(" ")),
         status: None,
         color: Some(color),
