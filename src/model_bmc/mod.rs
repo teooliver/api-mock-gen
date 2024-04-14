@@ -1,10 +1,14 @@
 // `Bmc` is short for Bakend Model Controller
 
 mod error;
+mod sprint;
+mod status;
 mod store;
 mod task;
 mod user;
 
+pub use sprint::*;
+pub use status::*;
 pub use task::*;
 pub use user::*;
 

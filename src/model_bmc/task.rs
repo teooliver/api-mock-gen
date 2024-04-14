@@ -16,6 +16,7 @@ pub struct Task {
     pub title: String,
     pub description: Option<String>,
     pub status: Option<String>,
+    pub status_id: Option<Uuid>,
     pub color: Option<String>,
     pub user_id: Option<Uuid>,
 }
@@ -149,6 +150,7 @@ mod tests {
             description: Some("Some Description 2".to_string()),
             status: None,
             color: None,
+            user_id: None,
         };
 
         let id = TaskBmc::create(&ctx, &mm, task_c).await?;
@@ -220,6 +222,7 @@ mod tests {
             description: random_task.description.clone(),
             color: None,
             status: None,
+            user_id: None,
         };
 
         let id = TaskBmc::create(&ctx, &mm, random_task).await?;
