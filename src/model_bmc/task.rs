@@ -17,6 +17,7 @@ pub struct Task {
     pub description: Option<String>,
     pub status: Option<String>,
     pub color: Option<String>,
+    pub user_id: Option<Uuid>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -25,6 +26,7 @@ pub struct TaskForCreate {
     pub description: Option<String>,
     pub status: Option<String>,
     pub color: Option<String>,
+    pub user_id: Option<Uuid>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -33,6 +35,7 @@ pub struct TaskForUpdate {
     pub description: Option<String>,
     pub status: Option<String>,
     pub color: Option<String>,
+    pub user_id: Option<Uuid>,
 }
 
 pub struct TaskBmc;
@@ -43,12 +46,16 @@ impl TaskBmc {
         let (id,) = sqlx::query_as::<_, (Uuid,)>(
             "INSERT INTO task (
             title,
-            description
+            description,
+            color,
+            user_id
             )
-            values ($1, $2) RETURNING id",
+            values ($1, $2,$3, $4) RETURNING id",
         )
         .bind(task_c.title)
         .bind(task_c.description)
+        .bind(task_c.color)
+        .bind(task_c.user_id)
         .fetch_one(db)
         .await?;
 

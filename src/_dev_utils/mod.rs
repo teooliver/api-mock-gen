@@ -1,9 +1,14 @@
-use crate::{ctx::Ctx, helpers::PROJECT_COLORS, model_bmc::TaskBmc};
+use crate::{
+    ctx::Ctx,
+    helpers::PROJECT_COLORS,
+    model_bmc::{TaskBmc, User, UserBmc, UserForCreate},
+};
 use fake::faker::lorem::en::*;
 use fake::Fake;
 use rand::Rng;
 use tokio::sync::OnceCell;
-use tracing::info;
+use tracing::{debug, info};
+use uuid::Uuid;
 
 use crate::model_bmc::{self, ModelManager, Task, TaskForCreate};
 
@@ -69,9 +74,53 @@ pub fn new_random_task(title: Option<String>) -> TaskForCreate {
         description: Some(Words(3..10).fake::<Vec<String>>().join(" ")),
         status: None,
         color: Some(color),
+        user_id: Uuid::try_parse("0199bccd-c585-41fc-875d-6af430c270eb").ok(),
     }
 }
 
-pub fn dangerously_drop_table() {
+pub async fn seed_users(
+    ctx: &Ctx,
+    mm: &ModelManager,
+    amount: Option<i8>,
+) -> model_bmc::Result<Vec<User>> {
+    let amount_of_users = match amount {
+        Some(amount) => amount,
+        None => 20,
+    };
+
+    let mut users: Vec<User> = vec![];
+    for _n in 1..=amount_of_users {
+        let random_user = new_random_user(None);
+        let id = UserBmc::create(ctx, mm, random_user).await?;
+        let user = UserBmc::get(ctx, mm, id).await?;
+
+        users.push(user);
+    }
+
+    Ok(users)
+}
+
+pub fn new_random_user(email: Option<String>) -> UserForCreate {
+    let first_name = fake::faker::name::en::FirstName().fake::<String>();
+    let last_name = fake::faker::name::en::LastName().fake::<String>();
+
+    let email_provider = fake::faker::internet::en::FreeEmailProvider().fake::<String>();
+    let email = match email {
+        Some(email) => email,
+        None => format!("{}@{}", first_name.to_lowercase(), email_provider),
+    };
+
+    UserForCreate {
+        email,
+        first_name: Some(first_name),
+        last_name: Some(last_name),
+    }
+}
+
+pub fn dangerously_drop_tables() {
+    todo!()
+}
+
+pub fn clean_slate_dev_db() {
     todo!()
 }

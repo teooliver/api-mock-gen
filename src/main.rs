@@ -1,3 +1,4 @@
+#![allow(warnings)]
 mod config;
 mod controllers;
 mod ctx;
@@ -52,10 +53,11 @@ async fn main() -> Result<(), Error> {
         .init();
 
     // -- FOR DEV ONLY
-    _dev_utils::init_dev().await;
+    // _dev_utils::init_dev().await;
     let mm = ModelManager::new().await?;
     let ctx = Ctx::root_ctx();
-    // _dev_utils::seed_tasks(&ctx, &mm, Some(30)).await?;
+    // _dev_utils::seed_users(&ctx, &mm, Some(30)).await?;
+    _dev_utils::seed_tasks(&ctx, &mm, Some(10)).await?;
 
     // type Db = Arc<RwLock<AppData>>; ?
     // Explain in my own words why we need Arc and RwLock here

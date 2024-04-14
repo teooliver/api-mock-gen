@@ -6,6 +6,7 @@ mod task;
 mod user;
 
 pub use task::*;
+pub use user::*;
 
 pub use self::error::{Error, Result};
 use self::store::{new_db_pool, Db};
