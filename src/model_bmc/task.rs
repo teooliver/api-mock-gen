@@ -15,6 +15,7 @@ pub struct Task {
     pub id: Uuid,
     pub title: String,
     pub description: Option<String>,
+    #[deprecated(note = "use status_id instead")]
     pub status: Option<String>,
     pub status_id: Option<Uuid>,
     pub color: Option<String>,
