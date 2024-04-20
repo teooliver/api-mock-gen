@@ -118,128 +118,46 @@ impl StatusBmc {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use crate::_dev_utils::{self, new_random_task};
+#[cfg(test)]
+mod tests {
+    use crate::_dev_utils::{self, new_random_task};
 
-//     use super::*;
-//     use anyhow::Result;
+    use super::*;
+    use anyhow::Result;
 
-//     // TODO: Check why Serial is breaking the tests
-//     // #[serial]
-//     #[tokio::test]
-//     async fn test_create_ok() -> Result<()> {
-//         let mm = _dev_utils::init_test().await;
-//         let ctx = Ctx::root_ctx();
+    // TODO: Check why Serial is breaking the tests
+    #[tokio::test]
+    async fn test_status_create_ok() -> Result<()> {
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
 
-//         let task_title = "Some Title 2";
+        let status_name = "TODO_STATUS";
 
-//         let task_c = TaskForCreate {
-//             title: task_title.to_string(),
-//             description: Some("Some Description 2".to_string()),
-//             status: None,
-//             color: None,
-//         };
+        let status_c = StatusForCreate {
+            name: status_name.to_string(),
+        };
 
-//         let id = TaskBmc::create(&ctx, &mm, task_c).await?;
+        let id = StatusBmc::create(&ctx, &mm, status_c).await?;
 
-//         let (title,): (String,) = sqlx::query_as("SELECT title FROM task WHERE id = $1")
-//             .bind(id)
-//             .fetch_one(mm.db())
-//             .await?;
+        let (name,): (String,) = sqlx::query_as("SELECT name FROM status WHERE id = $1")
+            .bind(id)
+            .fetch_one(mm.db())
+            .await?;
 
-//         assert_eq!(title, task_title);
+        assert_eq!(name, status_name);
 
-//         let task = TaskBmc::get(&ctx, &mm, id).await?;
-//         assert_eq!(task.title, task_title);
+        let status = StatusBmc::get(&ctx, &mm, id).await?;
+        assert_eq!(status.name, status_name);
 
-//         // -- Clean
-//         let count = sqlx::query("DELETE FROM task WHERE id = $1")
-//             .bind(id)
-//             .execute(mm.db())
-//             .await?
-//             .rows_affected();
+        // -- Clean
+        let count = sqlx::query("DELETE FROM status WHERE id = $1")
+            .bind(id)
+            .execute(mm.db())
+            .await?
+            .rows_affected();
 
-//         assert_eq!(count, 1, "Did not delete 1 row?");
+        assert_eq!(count, 1, "Did not delete 1 row?");
 
-//         Ok(())
-//     }
-
-//     // #[serial]
-//     #[tokio::test]
-//     async fn test_get_err_not_found() -> Result<()> {
-//         let mm = _dev_utils::init_test().await;
-//         let ctx = Ctx::root_ctx();
-//         let id: Uuid = Uuid::try_parse("2be8791f-f9b9-48bc-85e3-818183c6deac").unwrap();
-//         let res = TaskBmc::get(&ctx, &mm, id).await;
-
-//         assert!(
-//             matches!(res, Err(Error::EntityNotFound { entity: "task", id })),
-//             "EntityNotFound not matching"
-//         );
-
-//         Ok(())
-//     }
-
-//     // #[serial]
-//     #[tokio::test]
-//     async fn test_list_ok() -> Result<()> {
-//         let mm = _dev_utils::init_test().await;
-//         let ctx = Ctx::root_ctx();
-//         // _dev_utils::seed_tasks(&ctx, &mm, Some(20)).await?;
-
-//         let tasks = TaskBmc::list(&ctx, &mm).await?;
-
-//         assert!(tasks.len() >= 1);
-
-//         Ok(())
-//     }
-
-//     // #[serial]
-//     #[tokio::test]
-//     async fn test_update_ok() -> Result<()> {
-//         let mm = _dev_utils::init_test().await;
-//         let ctx = Ctx::root_ctx();
-
-//         let fx_title = "test_update_ok - task 01".to_string();
-//         let fx_title_new = "test_update_ok - task 01 - new".to_string();
-
-//         let random_task = new_random_task(Some(fx_title));
-//         let task_updated = TaskForUpdate {
-//             title: Some(fx_title_new.clone()),
-//             description: random_task.description.clone(),
-//             color: None,
-//             status: None,
-//         };
-
-//         let id = TaskBmc::create(&ctx, &mm, random_task).await?;
-
-//         TaskBmc::update(&ctx, &mm, id, task_updated).await?;
-
-//         let (title,): (String,) = sqlx::query_as("SELECT title FROM task WHERE id = $1")
-//             .bind(id)
-//             .fetch_one(mm.db())
-//             .await?;
-
-//         assert_eq!(title, fx_title_new);
-
-//         Ok(())
-//     }
-
-//     // #[serial]
-//     #[tokio::test]
-//     async fn test_delete_err_not_found() -> Result<()> {
-//         let mm = _dev_utils::init_test().await;
-//         let ctx = Ctx::root_ctx();
-//         let id: Uuid = Uuid::try_parse("26af6714-7734-4ebf-9474-23af4f481688").unwrap();
-
-//         let res = TaskBmc::delete(&ctx, &mm, id).await;
-
-//         assert!(
-//             matches!(res, Err(Error::EntityNotFound { entity: "task", id })),
-//             "EntityNotFound not matching"
-//         );
-
-//         Ok(())
-//     }
-// }
+        Ok(())
+    }
+}

@@ -93,8 +93,8 @@ impl Task {
             status: TaskStatus::get_random_task_status(),
             user_ref,
             created_at: Utc::now(),
-            started_at: Some(fake_initial_date),
             updated_at: fake_end_date,
+            started_at: Some(fake_initial_date),
             finished_at: Some(fake_end_date),
             color: Some(color),
         }

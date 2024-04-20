@@ -11,58 +11,58 @@ use strum_macros::Display;
 use uuid::Uuid;
 
 #[derive(Clone, Debug, Serialize, sqlx::FromRow)]
-pub struct Sprint {
+pub struct Board {
     pub id: Uuid,
     pub name: String,
 }
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct SprintForCreate {
+pub struct BoardForCreate {
     pub name: String,
 }
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct SprintForUpdate {
+pub struct BoardForUpdate {
     pub name: Option<String>,
 }
 
-pub struct SprintBmc;
+pub struct BoardBmc;
 
-impl SprintBmc {
-    pub async fn create(_ctx: &Ctx, mm: &ModelManager, sprint_c: SprintForCreate) -> Result<Uuid> {
+impl BoardBmc {
+    pub async fn create(_ctx: &Ctx, mm: &ModelManager, board_c: BoardForCreate) -> Result<Uuid> {
         let db = mm.db();
         let (id,) = sqlx::query_as::<_, (Uuid,)>(
-            "INSERT INTO sprint (
+            "INSERT INTO board (
             name
             )
             values ($1) RETURNING id",
         )
-        .bind(sprint_c.name)
+        .bind(board_c.name)
         .fetch_one(db)
         .await?;
 
         Ok(id)
     }
     // 1.07:46
-    pub async fn get(_ctx: &Ctx, mm: &ModelManager, id: Uuid) -> Result<Sprint> {
+    pub async fn get(_ctx: &Ctx, mm: &ModelManager, id: Uuid) -> Result<Board> {
         let db = mm.db();
 
-        let task: Sprint = sqlx::query_as("SELECT * FROM sprint WHERE id = $1")
+        let board: Board = sqlx::query_as("SELECT * FROM board WHERE id = $1")
             .bind(id)
             .fetch_optional(db)
             .await?
             .ok_or(Error::EntityNotFound {
-                entity: "sprint",
+                entity: "board",
                 id,
             })?;
 
-        Ok(task)
+        Ok(board)
     }
 
-    pub async fn list(_ctx: &Ctx, mm: &ModelManager) -> Result<Vec<Sprint>> {
+    pub async fn list(_ctx: &Ctx, mm: &ModelManager) -> Result<Vec<Board>> {
         let db = mm.db();
 
-        let tasks: Vec<Sprint> = sqlx::query_as("SELECT * FROM sprint ORDER by title LIMIT 30")
+        let tasks: Vec<Board> = sqlx::query_as("SELECT * FROM board ORDER by title LIMIT 30")
             .fetch_all(db)
             .await?;
 
@@ -73,15 +73,15 @@ impl SprintBmc {
         _ctx: &Ctx,
         mm: &ModelManager,
         id: Uuid,
-        sprint: SprintForUpdate,
+        board: BoardForUpdate,
     ) -> Result<()> {
         let db = mm.db();
 
         let rows_affected = sqlx::query!(
-            r#"UPDATE sprint
+            r#"UPDATE board
             SET name = $1
             WHERE id = $2"#,
-            sprint.name,
+            board.name,
             id
         )
         .execute(db)
@@ -90,7 +90,7 @@ impl SprintBmc {
 
         if rows_affected == 0 {
             return Err(Error::EntityNotFound {
-                entity: "sprint",
+                entity: "board",
                 id,
             });
         }
@@ -101,7 +101,7 @@ impl SprintBmc {
     pub async fn delete(_ctx: &Ctx, mm: &ModelManager, id: Uuid) -> Result<()> {
         let db = mm.db();
 
-        let count = sqlx::query("DELETE FROM sprint WHERE id = $1")
+        let count = sqlx::query("DELETE FROM board WHERE id = $1")
             .bind(id)
             .execute(db)
             .await?
@@ -109,7 +109,7 @@ impl SprintBmc {
 
         if count == 0 {
             return Err(Error::EntityNotFound {
-                entity: "sprint",
+                entity: "board",
                 id,
             });
         }

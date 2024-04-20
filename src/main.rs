@@ -56,9 +56,6 @@ async fn main() -> Result<(), Error> {
     // _dev_utils::init_dev().await;
     let mm = ModelManager::new().await?;
     let ctx = Ctx::root_ctx();
-    // _dev_utils::seed_users(&ctx, &mm, Some(30)).await?;
-    // _dev_utils::seed_tasks(&ctx, &mm, Some(10)).await?;
-    _dev_utils::seed_status(&ctx, &mm).await?;
 
     // type Db = Arc<RwLock<AppData>>; ?
     // Explain in my own words why we need Arc and RwLock here

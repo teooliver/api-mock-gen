@@ -2,8 +2,8 @@ use crate::{
     ctx::Ctx,
     helpers::PROJECT_COLORS,
     model_bmc::{
-        self, ModelManager, Status, StatusBmc, StatusForCreate, Task, TaskBmc, TaskForCreate, User,
-        UserBmc, UserForCreate,
+        self, Board, BoardBmc, BoardForCreate, ModelManager, Status, StatusBmc, StatusForCreate,
+        Task, TaskBmc, TaskForCreate, User, UserBmc, UserForCreate,
     },
 };
 use fake::faker::lorem::en::*;
@@ -45,6 +45,12 @@ pub fn new_random_task(title: Option<String>) -> TaskForCreate {
         Some(title) => title,
         None => Words(3..5).fake::<Vec<String>>().join(" "),
     };
+
+    // Get get all boards:
+    // -For each board
+    // --Get random status
+    // -- Get random user
+    // -- create 2 to 8 new TaskForCreate
 
     TaskForCreate {
         title,
@@ -166,4 +172,31 @@ impl TaskStatus {
             _ => TaskStatus::Backlog,
         }
     }
+}
+
+pub async fn seed_boards(
+    ctx: &Ctx,
+    mm: &ModelManager,
+    amount: Option<i8>,
+) -> model_bmc::Result<Vec<Board>> {
+    let amount_of_users = match amount {
+        Some(amount) => amount,
+        None => 2,
+    };
+
+    let mut boards: Vec<Board> = vec![];
+    for _n in 1..=amount_of_users {
+        let random_board = new_random_board();
+        let id = BoardBmc::create(ctx, mm, random_board).await?;
+        let board = BoardBmc::get(ctx, mm, id).await?;
+
+        boards.push(board);
+    }
+
+    Ok(boards)
+}
+
+pub fn new_random_board() -> BoardForCreate {
+    let name = fake::faker::lorem::en::Word().fake::<String>();
+    BoardForCreate { name }
 }

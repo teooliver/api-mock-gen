@@ -140,7 +140,7 @@ mod tests {
     // TODO: Check why Serial is breaking the tests
     // #[serial]
     #[tokio::test]
-    async fn test_create_ok() -> Result<()> {
+    async fn test_task_create_ok() -> Result<()> {
         let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
 
@@ -180,7 +180,7 @@ mod tests {
 
     // #[serial]
     #[tokio::test]
-    async fn test_get_err_not_found() -> Result<()> {
+    async fn test_task_get_err_not_found() -> Result<()> {
         let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let id: Uuid = Uuid::try_parse("2be8791f-f9b9-48bc-85e3-818183c6deac").unwrap();
@@ -196,7 +196,7 @@ mod tests {
 
     // #[serial]
     #[tokio::test]
-    async fn test_list_ok() -> Result<()> {
+    async fn test_task_list_ok() -> Result<()> {
         let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         // _dev_utils::seed_tasks(&ctx, &mm, Some(20)).await?;
@@ -210,7 +210,7 @@ mod tests {
 
     // #[serial]
     #[tokio::test]
-    async fn test_update_ok() -> Result<()> {
+    async fn test__task_update_ok() -> Result<()> {
         let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
 
@@ -242,7 +242,7 @@ mod tests {
 
     // #[serial]
     #[tokio::test]
-    async fn test_delete_err_not_found() -> Result<()> {
+    async fn test_task_delete_err_not_found() -> Result<()> {
         let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let id: Uuid = Uuid::try_parse("26af6714-7734-4ebf-9474-23af4f481688").unwrap();

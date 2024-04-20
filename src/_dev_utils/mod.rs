@@ -12,6 +12,7 @@ use uuid::Uuid;
 
 use crate::model_bmc::{self, ModelManager, Task, TaskForCreate};
 
+mod build_db_state;
 mod dev_db;
 mod seed;
 pub use seed::*;
