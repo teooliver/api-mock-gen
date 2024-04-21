@@ -6,7 +6,7 @@ use chrono::Utc;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use serial_test::serial;
-use sqlx::FromRow;
+use sqlx::{query_builder::QueryBuilder, Execute, FromRow};
 use strum_macros::Display;
 use uuid::Uuid;
 
@@ -256,4 +256,93 @@ mod tests {
 
         Ok(())
     }
+}
+
+#[derive(Clone, Debug, Serialize, sqlx::FromRow)]
+pub struct TaskFilter {
+    pub id: Option<Uuid>,
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub status_id: Option<Uuid>,
+    pub color: Option<String>,
+    pub user_id: Option<Uuid>,
+}
+
+fn filter_task_query(filter: TaskFilter) -> String {
+    if let (None, None, None, None, None, None) = (
+        filter.id,
+        filter.title,
+        filter.description,
+        filter.status_id,
+        filter.color,
+        filter.user_id,
+    ) {
+        return "SELECT * from task".into();
+    }
+
+    let mut query = QueryBuilder::new("SELECT * from task");
+
+    query.push(" WHERE");
+
+    if let Some(id) = filter.id {
+        query.push(" id = ");
+        query.push_bind(id);
+    }
+
+    if let Some(title) = filter.title {
+        if filter.id.is_some() {
+            query.push(" AND");
+        }
+        // TODO: Check if total or partialy matches
+        query.push(" title = ");
+        query.push_bind(title);
+    }
+
+    if let Some(description) = filter.description {
+        if filter.id.is_some() || filter.title.is_some() {
+            query.push(" AND");
+        }
+
+        // TODO: Check if total or partialy matches
+        query.push(" description = ");
+        query.push_bind(description);
+    }
+
+    if let Some(status_id) = filter.status_id {
+        if filter.id.is_some() || filter.title.is_some() || filter.description.is_some() {
+            query.push(" AND");
+        }
+
+        query.push(" status_id = ");
+        query.push_bind(status_id);
+    }
+
+    if let Some(color) = filter.color {
+        if filter.id.is_some()
+            || filter.title.is_some()
+            || filter.description.is_some()
+            || filter.status_id.is_some()
+        {
+            query.push(" AND");
+        }
+
+        query.push(" color = ");
+        query.push_bind(color);
+    }
+
+    if let Some(user_id) = filter.user_id {
+        if filter.id.is_some()
+            || filter.title.is_some()
+            || filter.description.is_some()
+            || filter.status_id.is_some()
+            || filter.color.is_some()
+        {
+            query.push(" AND");
+        }
+
+        query.push(" user_id = ");
+        query.push_bind(user_id);
+    }
+
+    query.build().sql().into()
 }

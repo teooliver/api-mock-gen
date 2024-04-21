@@ -1,5 +1,4 @@
 // `Bmc` is short for Bakend Model Controller
-
 mod board;
 mod error;
 mod status;
