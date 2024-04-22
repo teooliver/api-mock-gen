@@ -8,6 +8,7 @@ use crate::{
 };
 use fake::faker::lorem::en::*;
 use fake::Fake;
+use rand::seq::SliceRandom;
 use rand::Rng;
 use strum_macros::Display;
 use tokio::sync::OnceCell;
@@ -24,8 +25,11 @@ pub async fn seed_tasks(
         None => 20,
     };
 
+    let status_list = StatusBmc::list(ctx, mm).await?;
+
     let mut tasks: Vec<Task> = vec![];
     for _n in 1..=amount_of_tasks {
+        let random_status = status_list.choose(&mut rand::thread_rng()).unwrap();
         let random_task = new_random_task(None);
         let id = TaskBmc::create(ctx, mm, random_task).await?;
         let task = TaskBmc::get(ctx, mm, id).await?;
@@ -36,7 +40,11 @@ pub async fn seed_tasks(
     Ok(tasks)
 }
 
-pub fn new_random_task(title: Option<String>) -> TaskForCreate {
+pub fn new_random_task(
+    title: Option<String>,
+    status_list: Option<Vec<Status>>,
+    user_list: Option<Vec<User>>,
+) -> TaskForCreate {
     let color = rand::thread_rng()
         .gen_range(0..(PROJECT_COLORS.len() - 1))
         .to_string();
@@ -44,6 +52,18 @@ pub fn new_random_task(title: Option<String>) -> TaskForCreate {
     let title = match title {
         Some(title) => title,
         None => Words(3..5).fake::<Vec<String>>().join(" "),
+    };
+
+    let status_id: Option<Uuid> = match status_list {
+        // TODO: get random status_id
+        Some(status_list) => Some(status_list[0].id),
+        None => None,
+    };
+
+    let user_id: Option<Uuid> = match user_list {
+        // TODO: get random user_id
+        Some(user_list) => Some(user_list[0].id),
+        None => None,
     };
 
     // Get get all boards:
@@ -56,8 +76,9 @@ pub fn new_random_task(title: Option<String>) -> TaskForCreate {
         title,
         description: Some(Words(3..10).fake::<Vec<String>>().join(" ")),
         status: None,
+        status_id,
         color: Some(color),
-        user_id: Uuid::try_parse("0199bccd-c585-41fc-875d-6af430c270eb").ok(),
+        user_id,
     }
 }
 

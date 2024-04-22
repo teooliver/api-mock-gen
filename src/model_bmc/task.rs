@@ -26,7 +26,9 @@ pub struct Task {
 pub struct TaskForCreate {
     pub title: String,
     pub description: Option<String>,
+    #[deprecated(note = "use status_id instead")]
     pub status: Option<String>,
+    pub status_id: Option<Uuid>,
     pub color: Option<String>,
     pub user_id: Option<Uuid>,
 }
@@ -35,7 +37,9 @@ pub struct TaskForCreate {
 pub struct TaskForUpdate {
     pub title: Option<String>,
     pub description: Option<String>,
+    #[deprecated(note = "use status_id instead")]
     pub status: Option<String>,
+    pub status_id: Option<Uuid>,
     pub color: Option<String>,
     pub user_id: Option<Uuid>,
 }
@@ -268,13 +272,13 @@ pub struct TaskFilter {
     pub user_id: Option<Uuid>,
 }
 
-fn filter_task_query(filter: TaskFilter) -> String {
+fn filter_task_query(filter: &TaskFilter) -> String {
     if let (None, None, None, None, None, None) = (
         filter.id,
-        filter.title,
-        filter.description,
+        filter.title.clone(),
+        filter.description.clone(),
         filter.status_id,
-        filter.color,
+        filter.color.clone(),
         filter.user_id,
     ) {
         return "SELECT * from task".into();
@@ -289,7 +293,7 @@ fn filter_task_query(filter: TaskFilter) -> String {
         query.push_bind(id);
     }
 
-    if let Some(title) = filter.title {
+    if let Some(title) = &filter.title {
         if filter.id.is_some() {
             query.push(" AND");
         }
@@ -298,7 +302,7 @@ fn filter_task_query(filter: TaskFilter) -> String {
         query.push_bind(title);
     }
 
-    if let Some(description) = filter.description {
+    if let Some(description) = &filter.description {
         if filter.id.is_some() || filter.title.is_some() {
             query.push(" AND");
         }
@@ -317,7 +321,7 @@ fn filter_task_query(filter: TaskFilter) -> String {
         query.push_bind(status_id);
     }
 
-    if let Some(color) = filter.color {
+    if let Some(color) = &filter.color {
         if filter.id.is_some()
             || filter.title.is_some()
             || filter.description.is_some()

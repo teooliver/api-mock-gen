@@ -62,7 +62,7 @@ impl StatusBmc {
     pub async fn list(_ctx: &Ctx, mm: &ModelManager) -> Result<Vec<Status>> {
         let db = mm.db();
 
-        let tasks: Vec<Status> = sqlx::query_as("SELECT * FROM status ORDER by title LIMIT 30")
+        let tasks: Vec<Status> = sqlx::query_as("SELECT * FROM status ORDER by title LIMIT 10")
             .fetch_all(db)
             .await?;
 
