@@ -62,7 +62,7 @@ impl BoardBmc {
     pub async fn list(_ctx: &Ctx, mm: &ModelManager) -> Result<Vec<Board>> {
         let db = mm.db();
 
-        let tasks: Vec<Board> = sqlx::query_as("SELECT * FROM board ORDER by title LIMIT 30")
+        let tasks: Vec<Board> = sqlx::query_as("SELECT * FROM board ORDER by name LIMIT 30")
             .fetch_all(db)
             .await?;
 

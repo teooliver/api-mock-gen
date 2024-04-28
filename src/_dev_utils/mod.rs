@@ -15,6 +15,7 @@ use crate::model_bmc::{self, ModelManager, Task, TaskForCreate};
 mod build_db_state;
 mod dev_db;
 mod seed;
+pub use build_db_state::*;
 pub use seed::*;
 
 pub async fn init_dev() {

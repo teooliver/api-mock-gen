@@ -53,13 +53,15 @@ impl TaskBmc {
             "INSERT INTO task (
             title,
             description,
+            status_id,
             color,
             user_id
             )
-            values ($1, $2,$3, $4) RETURNING id",
+            values ($1, $2,$3, $4, $5) RETURNING id",
         )
         .bind(task_c.title)
         .bind(task_c.description)
+        .bind(task_c.status_id)
         .bind(task_c.color)
         .bind(task_c.user_id)
         .fetch_one(db)
@@ -67,7 +69,7 @@ impl TaskBmc {
 
         Ok(id)
     }
-    // 1.07:46
+    // Stopped at 1.07:46
     pub async fn get(_ctx: &Ctx, mm: &ModelManager, id: Uuid) -> Result<Task> {
         let db = mm.db();
 
@@ -156,6 +158,7 @@ mod tests {
             status: None,
             color: None,
             user_id: None,
+            status_id: None,
         };
 
         let id = TaskBmc::create(&ctx, &mm, task_c).await?;
@@ -221,13 +224,14 @@ mod tests {
         let fx_title = "test_update_ok - task 01".to_string();
         let fx_title_new = "test_update_ok - task 01 - new".to_string();
 
-        let random_task = new_random_task(Some(fx_title));
+        let random_task = new_random_task(Some(fx_title), None, None);
         let task_updated = TaskForUpdate {
             title: Some(fx_title_new.clone()),
             description: random_task.description.clone(),
             color: None,
             status: None,
             user_id: None,
+            status_id: None,
         };
 
         let id = TaskBmc::create(&ctx, &mm, random_task).await?;

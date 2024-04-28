@@ -57,23 +57,23 @@ impl UserBmc {
     pub async fn get(_ctx: &Ctx, mm: &ModelManager, id: Uuid) -> Result<User> {
         let db = mm.db();
 
-        let task: User = sqlx::query_as("SELECT * FROM \"user\" WHERE id = $1")
+        let user: User = sqlx::query_as("SELECT * FROM \"user\" WHERE id = $1")
             .bind(id)
             .fetch_optional(db)
             .await?
             .ok_or(Error::EntityNotFound { entity: "user", id })?;
 
-        Ok(task)
+        Ok(user)
     }
 
     pub async fn list(_ctx: &Ctx, mm: &ModelManager) -> Result<Vec<User>> {
         let db = mm.db();
 
-        let tasks: Vec<User> = sqlx::query_as("SELECT * FROM \"user\" ORDER by title LIMIT 30")
+        let users: Vec<User> = sqlx::query_as("SELECT * FROM \"user\" ORDER by email LIMIT 30")
             .fetch_all(db)
             .await?;
 
-        Ok(tasks)
+        Ok(users)
     }
 
     pub async fn update(

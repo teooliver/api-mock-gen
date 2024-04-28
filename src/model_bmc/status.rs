@@ -47,7 +47,7 @@ impl StatusBmc {
     pub async fn get(_ctx: &Ctx, mm: &ModelManager, id: Uuid) -> Result<Status> {
         let db = mm.db();
 
-        let task: Status = sqlx::query_as("SELECT * FROM status WHERE id = $1")
+        let status: Status = sqlx::query_as("SELECT * FROM status WHERE id = $1")
             .bind(id)
             .fetch_optional(db)
             .await?
@@ -56,17 +56,17 @@ impl StatusBmc {
                 id,
             })?;
 
-        Ok(task)
+        Ok(status)
     }
 
     pub async fn list(_ctx: &Ctx, mm: &ModelManager) -> Result<Vec<Status>> {
         let db = mm.db();
 
-        let tasks: Vec<Status> = sqlx::query_as("SELECT * FROM status ORDER by title LIMIT 10")
+        let status_list: Vec<Status> = sqlx::query_as("SELECT * FROM status ORDER by name LIMIT 1")
             .fetch_all(db)
             .await?;
 
-        Ok(tasks)
+        Ok(status_list)
     }
 
     pub async fn update(

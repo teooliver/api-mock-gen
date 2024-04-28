@@ -22,28 +22,31 @@ pub async fn seed_tasks(
 ) -> model_bmc::Result<Vec<Task>> {
     let amount_of_tasks = match amount {
         Some(amount) => amount,
-        None => 20,
+        None => 10,
     };
 
     let status_list = StatusBmc::list(ctx, mm).await?;
+    let user_list = UserBmc::list(ctx, mm).await?;
 
     let mut tasks: Vec<Task> = vec![];
-    for _n in 1..=amount_of_tasks {
-        let random_status = status_list.choose(&mut rand::thread_rng()).unwrap();
-        let random_task = new_random_task(None);
-        let id = TaskBmc::create(ctx, mm, random_task).await?;
-        let task = TaskBmc::get(ctx, mm, id).await?;
+    for user in user_list {
+        for _n in 1..=amount_of_tasks {
+            let random_task = new_random_task(None, Some(status_list.clone()), Some(user.clone()));
+            let id = TaskBmc::create(ctx, mm, random_task).await?;
+            let task = TaskBmc::get(ctx, mm, id).await?;
 
-        tasks.push(task);
+            tasks.push(task);
+        }
     }
 
     Ok(tasks)
 }
 
+// TODO: Optimize new_random_task using refs
 pub fn new_random_task(
     title: Option<String>,
     status_list: Option<Vec<Status>>,
-    user_list: Option<Vec<User>>,
+    user: Option<User>,
 ) -> TaskForCreate {
     let color = rand::thread_rng()
         .gen_range(0..(PROJECT_COLORS.len() - 1))
@@ -60,17 +63,10 @@ pub fn new_random_task(
         None => None,
     };
 
-    let user_id: Option<Uuid> = match user_list {
-        // TODO: get random user_id
-        Some(user_list) => Some(user_list[0].id),
+    let user_id: Option<Uuid> = match user {
+        Some(user) => Some(user.id),
         None => None,
     };
-
-    // Get get all boards:
-    // -For each board
-    // --Get random status
-    // -- Get random user
-    // -- create 2 to 8 new TaskForCreate
 
     TaskForCreate {
         title,
@@ -89,7 +85,7 @@ pub async fn seed_users(
 ) -> model_bmc::Result<Vec<User>> {
     let amount_of_users = match amount {
         Some(amount) => amount,
-        None => 20,
+        None => 6,
     };
 
     let mut users: Vec<User> = vec![];
@@ -111,7 +107,12 @@ pub fn new_random_user(email: Option<String>) -> UserForCreate {
     let email_provider = fake::faker::internet::en::FreeEmailProvider().fake::<String>();
     let email = match email {
         Some(email) => email,
-        None => format!("{}@{}", first_name.to_lowercase(), email_provider),
+        None => format!(
+            "{}_{}@{}",
+            first_name.to_lowercase(),
+            last_name.to_lowercase(),
+            email_provider
+        ),
     };
 
     UserForCreate {
