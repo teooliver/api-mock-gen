@@ -44,6 +44,19 @@ pub struct TaskForUpdate {
     pub user_id: Option<Uuid>,
 }
 
+#[derive(Clone, Debug, Serialize, sqlx::FromRow)]
+pub struct TaskFilter {
+    pub id: Option<Uuid>, // Todo: Should this just be a String so we can look for partial uuids?
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub status_id: Option<Uuid>,
+    pub color: Option<String>,
+    pub user_id: Option<Uuid>, // Todo: Should this just be a String so we can look for partial uuids?
+    pub user_name: Option<String>,
+    pub board: Option<String>,
+    pub status_name: Option<String>,
+}
+
 pub struct TaskBmc;
 
 impl TaskBmc {
@@ -69,7 +82,6 @@ impl TaskBmc {
 
         Ok(id)
     }
-    // Stopped at 1.07:46
     pub async fn get(_ctx: &Ctx, mm: &ModelManager, id: Uuid) -> Result<Task> {
         let db = mm.db();
 
@@ -80,6 +92,28 @@ impl TaskBmc {
             .ok_or(Error::EntityNotFound { entity: "task", id })?;
 
         Ok(task)
+    }
+
+    pub async fn get_tasks_by_user(
+        _ctx: &Ctx,
+        mm: &ModelManager,
+        user_id: Uuid,
+    ) -> Result<Vec<Task>> {
+        println!("{:?}", user_id);
+        let db = mm.db();
+
+        let tasks: Vec<Task> = sqlx::query_as(
+            "SELECT title, user_id, first_name
+            FROM task
+            INNER JOIN app_user
+            ON task.user_id = app_user.id
+            WHERE task.user_id = $1",
+        )
+        .bind(user_id)
+        .fetch_all(db)
+        .await?;
+
+        Ok(tasks)
     }
 
     pub async fn list(_ctx: &Ctx, mm: &ModelManager) -> Result<Vec<Task>> {
@@ -133,6 +167,15 @@ impl TaskBmc {
         }
 
         Ok(())
+    }
+
+    pub async fn search(_ctx: &Ctx, mm: &ModelManager, filter: TaskFilter) -> Result<Vec<Task>> {
+        let db = mm.db();
+        let filter_query = build_filter_task_query(&filter);
+
+        let tasks: Vec<Task> = sqlx::query_as(&filter_query).fetch_all(db).await?;
+
+        Ok(tasks)
     }
 }
 
@@ -266,17 +309,7 @@ mod tests {
     }
 }
 
-#[derive(Clone, Debug, Serialize, sqlx::FromRow)]
-pub struct TaskFilter {
-    pub id: Option<Uuid>,
-    pub title: Option<String>,
-    pub description: Option<String>,
-    pub status_id: Option<Uuid>,
-    pub color: Option<String>,
-    pub user_id: Option<Uuid>,
-}
-
-fn filter_task_query(filter: &TaskFilter) -> String {
+fn build_filter_task_query(filter: &TaskFilter) -> String {
     if let (None, None, None, None, None, None) = (
         filter.id,
         filter.title.clone(),
@@ -289,7 +322,6 @@ fn filter_task_query(filter: &TaskFilter) -> String {
     }
 
     let mut query = QueryBuilder::new("SELECT * from task");
-
     query.push(" WHERE");
 
     if let Some(id) = filter.id {

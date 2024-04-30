@@ -48,3 +48,19 @@ pub fn dangerously_drop_tables() {
 pub fn clean_slate_dev_db() {
     todo!()
 }
+
+pub fn copy_db_to_csv() {
+    // get the list of all tables
+    // for each table:
+    // COPY 'table TO '.\{table}_db.csv' DELIMITER ',' CSV HEADER;
+}
+
+pub fn copy_csv_to_db() {
+    // get the list of all files in the dataset
+    // for each file:
+    //
+    // COPY file_name
+    // FROM '/docker-entrypoint-initdb.d/file_name.csv'
+    // DELIMITER ','
+    // CSV HEADER;
+}

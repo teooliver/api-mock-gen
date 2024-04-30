@@ -38,7 +38,7 @@ impl UserBmc {
     pub async fn create(_ctx: &Ctx, mm: &ModelManager, user_c: UserForCreate) -> Result<Uuid> {
         let db = mm.db();
         let (id,) = sqlx::query_as::<_, (Uuid,)>(
-            "INSERT INTO \"user\" (
+            "INSERT INTO app_user (
             email,
             first_name,
             last_name
@@ -57,11 +57,14 @@ impl UserBmc {
     pub async fn get(_ctx: &Ctx, mm: &ModelManager, id: Uuid) -> Result<User> {
         let db = mm.db();
 
-        let user: User = sqlx::query_as("SELECT * FROM \"user\" WHERE id = $1")
+        let user: User = sqlx::query_as("SELECT * FROM app_user WHERE id = $1")
             .bind(id)
             .fetch_optional(db)
             .await?
-            .ok_or(Error::EntityNotFound { entity: "user", id })?;
+            .ok_or(Error::EntityNotFound {
+                entity: "app_user",
+                id,
+            })?;
 
         Ok(user)
     }
@@ -69,7 +72,7 @@ impl UserBmc {
     pub async fn list(_ctx: &Ctx, mm: &ModelManager) -> Result<Vec<User>> {
         let db = mm.db();
 
-        let users: Vec<User> = sqlx::query_as("SELECT * FROM \"user\" ORDER by email LIMIT 30")
+        let users: Vec<User> = sqlx::query_as("SELECT * FROM app_user ORDER by email LIMIT 30")
             .fetch_all(db)
             .await?;
 
@@ -85,7 +88,7 @@ impl UserBmc {
         let db = mm.db();
 
         let rows_affected = sqlx::query!(
-            r#"UPDATE "user"
+            r#"UPDATE app_user
             SET email = $1, first_name = $2, last_name = $3
             WHERE id = $4"#,
             user.email,
@@ -98,7 +101,10 @@ impl UserBmc {
         .rows_affected();
 
         if rows_affected == 0 {
-            return Err(Error::EntityNotFound { entity: "user", id });
+            return Err(Error::EntityNotFound {
+                entity: "app_user",
+                id,
+            });
         }
 
         Ok(())
@@ -107,14 +113,17 @@ impl UserBmc {
     pub async fn delete(_ctx: &Ctx, mm: &ModelManager, id: Uuid) -> Result<()> {
         let db = mm.db();
 
-        let count = sqlx::query("DELETE FROM \"user\" WHERE id = $1")
+        let count = sqlx::query("DELETE FROM app_user WHERE id = $1")
             .bind(id)
             .execute(db)
             .await?
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::EntityNotFound { entity: "user", id });
+            return Err(Error::EntityNotFound {
+                entity: "app_user",
+                id,
+            });
         }
 
         Ok(())

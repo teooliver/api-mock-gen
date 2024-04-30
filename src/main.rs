@@ -25,6 +25,7 @@ use tower_http::services::ServeDir;
 use tracing::{debug, info};
 use tracing_subscriber::fmt::format::json;
 use tracing_subscriber::EnvFilter;
+use uuid::uuid;
 
 use axum::{routing::get, Router};
 use std::net::SocketAddr;
@@ -55,8 +56,13 @@ async fn main() -> Result<(), Error> {
 
     // -- FOR DEV ONLY
     _dev_utils::init_dev().await;
-    // let mm = ModelManager::new().await?;
-    // let ctx = Ctx::root_ctx();
+    let mm = ModelManager::new().await?;
+    let ctx = Ctx::root_ctx();
+    let tasks =
+        TaskBmc::get_tasks_by_user(&ctx, &mm, uuid!("0d9d09c8-1321-4773-908e-0458d786e840"))
+            .await?;
+
+    println!("{:?}", tasks);
     build_dev_db_state().await?;
 
     // type Db = Arc<RwLock<AppData>>; ?
